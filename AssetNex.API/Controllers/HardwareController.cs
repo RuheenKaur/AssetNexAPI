@@ -1,4 +1,5 @@
 ﻿
+using AssetNex.API.Data;
 using AssetNex.API.Models.DomainModel;
 using AssetNex.API.Models.DTO.Hardware;
 using AssetNex.API.Repositories.Interface;
@@ -14,18 +15,19 @@ namespace AssetNex.API.Controllers
     public class HardwareController : ControllerBase
     {
         private readonly IHardwareRepository hardwareRepository;
+        private readonly ApplicationDbContext dbContext;
 
-        public HardwareController(IHardwareRepository hardwareRepository)
+        public HardwareController(IHardwareRepository hardwareRepository, ApplicationDbContext dbContext)
         {
             this.hardwareRepository = hardwareRepository;
+            this.dbContext = dbContext;
+
         }
 
         [HttpGet]
         public async Task<IActionResult> getAllHardware()
         {
             var assets = await hardwareRepository.getAllHardware();
-
-
             var response = assets.Select(asset => new Hardware
             {
                 Id = asset.Id,
@@ -40,66 +42,27 @@ namespace AssetNex.API.Controllers
             }).ToList();
 
             return Ok(response);
-
-
         }
 
         [HttpPost]
-
-        public async Task<IActionResult> CreateHardware([FromBody] CreateHardwareDto dto)
-
-
+        public IActionResult CreateHardware(CreateHardwareDto dto)
         {
-            var assetType = await hardwareRepository.GetHardwareTypeByIdAsync(dto.AssetTypeId);
-
-            if (assetType == null)
-                return BadRequest("Asset type not found");
-
             var asset = new Hardware
             {
                 Id = Guid.NewGuid(),
                 ProblemDescription = dto.ProblemDescription,
-
-
                 AssetTypeId = dto.AssetTypeId,
-
                 SerialNumber = dto.SerialNumber,
                 AssetName = dto.AssetName,
                 AssetType = dto.AssetType,
-
                 DateSubmitted = dto.DateSubmitted,
-
                 DateOfIssue = dto.DateOfIssue,
-
                 WarrantyDate = dto.WarrantyDate,
             };
 
-            await hardwareRepository.AddHardwareAsync(asset);
-
-
-            var response = new CreateHardwareDto
-            {
-                Id = asset.Id,
-                ProblemDescription = asset.ProblemDescription,
-
-
-                AssetTypeId = asset.AssetTypeId,
-
-                SerialNumber = asset.SerialNumber,
-                AssetName = asset.AssetName,
-                AssetType = asset.AssetType,
-
-                DateSubmitted = asset.DateSubmitted,
-
-                DateOfIssue = asset.DateOfIssue,
-
-                WarrantyDate = asset.WarrantyDate,
-
-            };
-
-            return CreatedAtAction(nameof(GetHardwareById), new { id = asset.Id }, response);
-
-
+            dbContext.Hardware.Add(asset);
+            dbContext.SaveChanges();
+            return Ok();
         }
 
         [HttpGet("{id}")]
@@ -121,8 +84,6 @@ namespace AssetNex.API.Controllers
                 DateSubmitted = asset.DateSubmitted,
                 DateOfIssue = asset.DateOfIssue,
                 WarrantyDate = asset.WarrantyDate,
-
-
             };
 
             return Ok(response);
@@ -135,25 +96,15 @@ namespace AssetNex.API.Controllers
         {
             var asset = new Hardware
             {
-
                 Id = request.Id,
                 ProblemDescription = request.ProblemDescription,
-
-
                 AssetTypeId = request.AssetTypeId,
-
                 SerialNumber = request.SerialNumber,
                 AssetName = request.AssetName,
                 AssetType = request.AssetType,
-
                 DateSubmitted = request.DateSubmitted,
-
                 DateOfIssue = request.DateOfIssue,
-
                 WarrantyDate = request.WarrantyDate,
-
-
-
             };
 
             asset = await hardwareRepository.UpdateAsync(asset);
@@ -162,9 +113,7 @@ namespace AssetNex.API.Controllers
                 if (asset == null)
                 {
                     return NotFound();
-
                 }
-
                 var response = new CreateHardwareDto
                 {
                     Id = asset.Id,
@@ -176,33 +125,23 @@ namespace AssetNex.API.Controllers
                     DateSubmitted = asset.DateSubmitted,
                     DateOfIssue = asset.DateOfIssue,
                     WarrantyDate = asset.WarrantyDate,
-
-
                 };
-
                 return Ok(response);
-
             }
-
         }
 
         [HttpDelete]
         [Route("{id:guid}")]
-
         public async Task<IActionResult> DeleteAsset([FromRoute] Guid id)
         {
             {
                 var currentAsset = await hardwareRepository.GetById(id);
-
                 if (currentAsset == null)
                 {
                     return NotFound();
                 }
-
                 await hardwareRepository.DeleteAsync(id);
-
                 return NoContent();
-
             }
         }
     }

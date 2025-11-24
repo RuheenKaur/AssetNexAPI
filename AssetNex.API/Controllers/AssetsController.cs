@@ -1,4 +1,4 @@
-﻿
+﻿using AssetNex.API.Data;
 using AssetNex.API.Models.DomainModel;
 using AssetNex.API.Models.DTO.Asset;
 using AssetNex.API.Repositories.Interface;
@@ -15,19 +15,18 @@ namespace AssetNex.API.Controllers
     {
         private readonly IAssetsRepository assetsRepository;
 
-        public AssetsController(IAssetsRepository assetsRepository)
+        private readonly ApplicationDbContext dbContext;
+
+        public AssetsController(IAssetsRepository assetsRepository, ApplicationDbContext dbContext)
         {
             this.assetsRepository = assetsRepository;
+            this.dbContext = dbContext;
         }
 
-
         [HttpGet]
-
         public async Task<IActionResult> getAllAssets()
         {
             var assets = await assetsRepository.getAllAssets();
-
-
             var response = assets.Select(asset => new AssetInfo
             {
                 Id = asset.Id,
@@ -47,51 +46,31 @@ namespace AssetNex.API.Controllers
             return Ok(response);
         }
 
+
+
         [HttpPost]
-
-        public async Task<IActionResult> CreateAsset([FromBody] CreateAssetDto dto)
-
-
+        public IActionResult CreateAsset(CreateInventoryDto dto)
         {
-            var assetType = await assetsRepository.GetAssetTypeByIdAsync(dto.AssetTypeId);
-
-
-            if (assetType == null)
-                return BadRequest("Asset type not found");
-
             var asset = new AssetInfo
             {
-
                 Id = Guid.NewGuid(),
                 Name = dto.Name,
-                SerialNumber = dto.SerialNumber,
                 Department = dto.Department,
+                AssetType = dto.AssetType,
+                SerialNumber = dto.SerialNumber,
                 DateOfIssue = dto.DateOfIssue,
                 WarrantyDate = dto.WarrantyDate,
                 AssetTypeId = dto.AssetTypeId,
-                Status = dto.Status,
                 UserId = dto.UserId,
-
+                User = dto.User,
+                Status = dto.Status
             };
 
-            await assetsRepository.AddAssetAsync(asset);
-
-            var response = new AssetDto
-            {
-                Id = asset.Id,
-                Name = asset.Name,
-                SerialNumber = asset.SerialNumber,
-                Department = asset.Department,
-                DateOfIssue = asset.DateOfIssue,
-                WarrantyDate = asset.WarrantyDate,
-                Status = asset.Status,
-                UserId = asset.UserId,
-                AssetTypeName = assetType.Name
-            };
-
-            return CreatedAtAction(nameof(GetAssetById), new { id = asset.Id }, response);
-
+            dbContext.AssetInfo.Add(asset);
+            dbContext.SaveChanges();
+            return Ok(asset);
         }
+
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAssetById(Guid id)

@@ -13,6 +13,8 @@ namespace AssetNex.API.Models.DTO.Asset
         public required Guid AssetTypeId { get; set; }
         public required string Status { get; set; }
         public required Guid UserId { get; set; }
+
+
     }
 }
 

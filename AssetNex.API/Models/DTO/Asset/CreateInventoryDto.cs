@@ -7,6 +7,14 @@ namespace AssetNex.API.Models.DTO.Asset
     {
         public Guid Id { get; set; }
         public required string SerialNumber { get; set; }
+
+        public string Name { get; set; }
+
+        public string Department
+        {
+            get; set;
+        }
+
         public required AssetType AssetType { get; set; }
         public Guid AssetTypeId { get; set; }
         public DateTime DateOfIssue { get; set; }

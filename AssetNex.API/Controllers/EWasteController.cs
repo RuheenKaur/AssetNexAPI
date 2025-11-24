@@ -1,4 +1,5 @@
 ﻿
+using AssetNex.API.Data;
 using AssetNex.API.Models.DomainModel;
 using AssetNex.API.Models.DTO.EWaste;
 using AssetNex.API.Repositories.Interface;
@@ -12,10 +13,12 @@ namespace AssetNex.API.Controllers
     public class EWasteController : ControllerBase
     {
         private readonly IEWasteRepository ewasteRepository;
+        private readonly ApplicationDbContext dbContext;
 
-        public EWasteController(IEWasteRepository ewasteRepository)
+        public EWasteController(IEWasteRepository ewasteRepository, ApplicationDbContext dbContext)
         {
             this.ewasteRepository = ewasteRepository;
+            this.dbContext = dbContext;
         }
 
         [HttpGet("disposable-assets")]
@@ -54,11 +57,8 @@ namespace AssetNex.API.Controllers
 
 
         [HttpPost("disposable-assets")]
-        public async Task<IActionResult> DisposedAsset([FromBody] DisposeAssetRequestDto dto)
+        public IActionResult DisposedAsset(DisposeAssetRequestDto dto)
         {
-            var ewaste = await ewasteRepository.GetEWasteByIdAsync(dto.AssetTypeId);
-            if (ewaste == null)
-                return BadRequest("Asset type not found");
 
             var waste = new EWaste
             {
@@ -74,28 +74,9 @@ namespace AssetNex.API.Controllers
                 Status = dto.Status,
             };
 
-
-
-            await ewasteRepository.AddEWasteAsync(ewaste);
-
-            var response = new DisposeAssetRequestDto
-            {
-
-                AssetTypeId = ewaste.AssetTypeId,
-                AssetName = ewaste.AssetName,
-                Reason = ewaste.Reason,
-                DisposedOn = ewaste.DisposedOn,
-                DisposedBy = ewaste.DisposedBy,
-                Condition = ewaste.Condition,
-                DateOfIssue = ewaste.DateOfIssue,
-                WarrantyDate = ewaste.WarrantyDate,
-                AssetType = ewaste.AssetType,
-                Status = ewaste.Status,
-
-            };
-
-            return CreatedAtAction(nameof(GetDisposedAssetsById), new { id = ewaste.Id }, response);
-
+            dbContext.EWastes.Add(waste);
+            dbContext.SaveChanges();
+            return Ok(waste);
         }
 
         [HttpPut]

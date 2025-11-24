@@ -30,7 +30,6 @@ namespace AssetNex.API.Controllers
 
             ILogger<AuthController> logger)
         {
-
             _userManager = userManager;
             _configuration = configuration;
             _jwtSettings = jwtOptions.Value;
@@ -53,10 +52,6 @@ namespace AssetNex.API.Controllers
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
 
                 };
-
-
-
-            //var userRoles = await _userManager.GetRolesAsync
 
 
             var userRoles = await _userManager.GetRolesAsync(user);

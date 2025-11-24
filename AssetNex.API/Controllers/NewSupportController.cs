@@ -1,10 +1,11 @@
 ﻿
 
 
+using AssetNex.API.Data;
 using AssetNex.API.Models.DomainModel;
+using AssetNex.API.Models.DTO.NewSupport;
 using AssetNex.API.Repositories.Interface;
 using Microsoft.AspNetCore.Mvc;
-using AssetNex.API.Models.DTO.NewSupport;
 
 
 
@@ -12,30 +13,19 @@ namespace AssetNex.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-
-
-        public class NewSupportController : ControllerBase
+    public class NewSupportController : ControllerBase
     {
         private readonly ISupportRepository supportRepository;
-
-        public NewSupportController(ISupportRepository supportRepository)
+        private readonly ApplicationDbContext dbContext;
+        public NewSupportController(ISupportRepository supportRepository, ApplicationDbContext dbContext)
         {
             this.supportRepository = supportRepository;
+            this.dbContext = dbContext;
         }
 
-       
-
-
-        [HttpPost()] 
-        public async Task<IActionResult> CreateNewSupportDto([FromBody] CreateNewSupportDto dto)
+        [HttpPost]
+        public async Task<IActionResult> CreateNewSupportDto(CreateNewSupportDto dto)
         {
-            var supportType = await supportRepository.GetSupportTypeByIdAsync(dto.Id);
-
-            //VALIDATING ASSET TYPE
-
-            if (supportType == null)
-                return BadRequest("Support type not found");
-            // Mapping from DTO to Domain Model
             var support = new NewSupport
             {
                 Id = dto.Id,
@@ -44,36 +34,17 @@ namespace AssetNex.API.Controllers
                 Email = dto.Email,
                 Department = dto.Department,
                 RequestType = dto.RequestType,
-                
             };
 
-            support = await supportRepository.CreateAsync(support);
-
-            // Mapping back to DTO for response
-            var response = new CreateNewSupportDto
-            {
-
-                Id = support.Id,
-                UserName = support.UserName,
-                EmployeeId = support.EmployeeId,
-                Email = support.Email,
-                Department = support.Department,
-                RequestType = support.RequestType,
-              
-
-            };
-
-            return CreatedAtAction(nameof(GetSupportTypeByIdAsync), new { id = support.Id }, response);
+            dbContext.NewSupports.Add(support);
+            dbContext.SaveChanges();
+            return Ok(support);
         }
-
-
 
         [HttpGet]
         public async Task<IActionResult> getAllSupport()
         {
             var getsupport = await supportRepository.getAllSupport();
-
-            // Convert domain model to DTO
             var response = getsupport.Select(support => new NewSupport
             {
                 Id = support.Id,
@@ -86,6 +57,7 @@ namespace AssetNex.API.Controllers
 
             return Ok(response);
         }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetSupportTypeByIdAsync(Guid id)
         {
@@ -101,41 +73,30 @@ namespace AssetNex.API.Controllers
                 Email = support.Email,
                 Department = support.Department,
                 RequestType = support.RequestType,
-               
-
             };
-
             return Ok(response);
         }
 
         [HttpPut]
         [Route("{id:guid}")]
-
         public async Task<IActionResult> UpdateSupport([FromRoute] Guid id, CreateNewSupportDto request)
         {
             var support = new NewSupport
             {
-
                 Id = request.Id,
                 UserName = request.UserName,
                 EmployeeId = request.EmployeeId,
                 Email = request.Email,
                 Department = request.Department,
                 RequestType = request.RequestType,
-               
-
-
             };
 
             support = await supportRepository.UpdateAsync(support);
-
             {
                 if (support == null)
                 {
                     return NotFound();
-
                 }
-                //convert domain model to dto 
 
                 var response = new CreateNewSupportDto
                 {
@@ -145,11 +106,7 @@ namespace AssetNex.API.Controllers
                     Email = support.Email,
                     Department = support.Department,
                     RequestType = support.RequestType,
-
-
                 };
-
-
                 return Ok(response);
             }
         }

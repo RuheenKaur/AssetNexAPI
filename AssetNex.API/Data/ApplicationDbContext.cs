@@ -24,12 +24,7 @@ namespace AssetNex.API.Data
         public DbSet<AssetLocations> AssetLocations { get; set; }
         public DbSet<InventoryAlert> InventoryAlert { get; set; }
 
-
-
     }
-
-
-
 }
 
 

@@ -1,4 +1,5 @@
 ﻿
+using AssetNex.API.Data;
 using AssetNex.API.Models.DomainModel;
 using AssetNex.API.Models.DTO.LiveTracking;
 
@@ -15,11 +16,11 @@ namespace AssetNex.API.Controllers
 
     {
         private readonly ILocationRepository locationRepository;
-
-
-        public AssetLocationsController(ILocationRepository locationRepository)
+        private readonly ApplicationDbContext dbContext;
+        public AssetLocationsController(ILocationRepository locationRepository, ApplicationDbContext dbContext)
         {
             this.locationRepository = locationRepository;
+            this.dbContext = dbContext;
         }
 
 
@@ -51,62 +52,27 @@ namespace AssetNex.API.Controllers
 
 
         [HttpPost("assetlocations/create")]
-
-        public async Task<IActionResult> CreateAssetLocation([FromBody] AssetLocations dto)
-
+        public IActionResult CreateAssetLocation(AssetLocationDto dto)
         {
-            var location = await locationRepository.GetLocationByIdAsync(dto.Id);
-
-
-            if (location == null)
-                return BadRequest("Asset type not found");
-
-
-            var asset = new AssetLocationDto
+            var asset = new AssetLocations
             {
                 Id = dto.Id,
                 SerialNumber = dto.SerialNumber,
                 AssetTypeId = dto.AssetTypeId,
                 AssetType = dto.AssetType,
-                status = dto.Status,
+                Status = dto.status,
                 Location = dto.Location,
                 LastCheckedOut = dto.LastCheckedOut,
                 Latitude = dto.Latitude,
                 Longitude = dto.Longitude,
                 Name = dto.Name,
-
-
             };
 
-            await locationRepository.AddAssetLocationAsync(asset);
-
-            var response = new AssetLocationDto
-            {
-
-                Id = asset.Id,
-                SerialNumber = asset.SerialNumber,
-                AssetTypeId = asset.AssetTypeId,
-                AssetType = asset.AssetType,
-                status = asset.status,
-                Location = asset.Location,
-                LastCheckedOut = asset.LastCheckedOut,
-                Latitude = asset.Latitude,
-                Longitude = asset.Longitude,
-                Name = asset.Name
-            };
-
-
-            return CreatedAtAction(nameof(GetByLocationId), new
-            {
-                id = dto.Id
-            }, response);
-
-
-
-            return CreatedAtAction(response);
-
-
+            dbContext.AssetLocations.Add(asset);
+            dbContext.SaveChanges();
+            return Ok(asset);
         }
+
 
         private object GetByLocationId()
         {

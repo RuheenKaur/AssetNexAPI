@@ -1,8 +1,8 @@
-﻿
+﻿using AssetNex.API.Data;
+using AssetNex.API.Models.DomainModel;
+using AssetNex.API.Models.DTO.LiveTracking;
 using AssetNex.API.Repositories.Interface;
 using Microsoft.AspNetCore.Mvc;
-using AssetNex.API.Models.DTO.LiveTracking;
-using AssetNex.API.Data;
 
 namespace AssetNex.API.Controllers
 {
@@ -14,104 +14,59 @@ namespace AssetNex.API.Controllers
 
     {
         private readonly ILocationRepository locationRepository;
-        private object GetById;
 
-        private readonly ApplicationDbContext applicationDbContext;
+        private readonly ApplicationDbContext dbContext;
 
-   public LocationController(ILocationRepository locationRepository)
+        public LocationController(ILocationRepository locationRepository, ApplicationDbContext dbContext)
         {
             this.locationRepository = locationRepository;
+            this.dbContext = dbContext;
+
         }
 
-      
         [HttpGet("locations")]
-
         public async Task<IActionResult> GetAllLocations()
         {
             var assets = await locationRepository.GetAllLocationAsync();
-
-            
             var response = assets.Select(asset => new LiveLocationDto
 
             {
-
                 Id = asset.Id,
                 SerialNumber = asset.SerialNumber,
                 AssetTypeId = asset.AssetTypeId,
                 AssetType = asset.AssetType,
-                status = asset.Status,
+                Status = asset.Status,
                 Location = asset.Location,
                 LastCheckedOut = asset.LastCheckedOut,
+                Latitude = asset.Latitude,
+                Longitude = asset.Longitude,
+                Name = asset.Name,
 
             })
             .ToList();
-
             return Ok(response);
         }
-
         [HttpPost("locations/create")]
-
-    
-        public async Task<IActionResult> CreateLocation([FromBody] LiveLocationDto dto)
-
+        public IActionResult CreateLocation(LiveLocationDto dto)
         {
-
-            
-            var location = await locationRepository.GetLocationByIdAsync(dto.Id);
-
-           
-            if (location == null)
-                return BadRequest("Asset type not found");
-
-
-            if (string.IsNullOrEmpty(dto.SerialNumber))
-                return BadRequest("Serial Number cannot be empty");
-
-            if (string.IsNullOrEmpty(dto.AssetType))
-                return BadRequest("Asset Type cannot be empty");
-
-            if (string.IsNullOrEmpty(dto.status))
-                return BadRequest("Status cannot be empty");
-
-            if (string.IsNullOrEmpty(dto.Location))
-                return BadRequest("Location cannot be empty");
-
-          
-            var asset = new LiveLocationDto
+            var asset = new LiveLocation
             {
                 Id = dto.Id,
                 SerialNumber = dto.SerialNumber,
                 AssetTypeId = dto.AssetTypeId,
                 AssetType = dto.AssetType,
-                status = dto.status,
+                Status = dto.Status,
                 Location = dto.Location,
                 LastCheckedOut = dto.LastCheckedOut,
-
+                Latitude = dto.Latitude,
+                Longitude = dto.Longitude,
+                Name = dto.Name,
             };
 
-            await locationRepository.AddLocationAsync(location);
-
-            var response = new LiveLocationDto
-            {
-
-                Id = asset.Id,
-                SerialNumber = asset.SerialNumber,
-                AssetTypeId = asset.AssetTypeId,
-                AssetType = asset.AssetType,
-                status = asset.status,
-                Location = asset.Location,
-                LastCheckedOut = asset.LastCheckedOut,
-            };
-
-            return CreatedAtAction(nameof(GetById), new { id = asset.Id }, response);
-
-
+            dbContext.Location.Add(asset);
+            dbContext.SaveChanges();
+            return Ok(asset);
         }
-
-
-       
-
-
     }
 
 }

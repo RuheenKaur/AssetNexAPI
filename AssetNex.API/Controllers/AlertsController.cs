@@ -27,6 +27,7 @@ namespace AssetNex.API.Controllers
             return Ok(new { Message = "Stock updated and alert check triggered successfully" });
         }
 
+
         [HttpGet("realalerts")]
         public async Task<IActionResult> GetRealAlerts()
         {
