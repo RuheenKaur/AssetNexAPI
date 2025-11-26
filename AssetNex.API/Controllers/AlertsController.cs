@@ -1,7 +1,9 @@
-﻿using AssetNex.API.Models.DomainModel;
+﻿using AssetNex.API.Hubs;
+using AssetNex.API.Models.DomainModel;
 using AssetNex.API.Repositories.Interface;
 using AssetNex.API.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace AssetNex.API.Controllers
 {
@@ -11,11 +13,13 @@ namespace AssetNex.API.Controllers
     {
         private readonly IAlertsRepository alertsRepository;
         private readonly IAlertService alertService;
-
-        public AlertsController(IAlertsRepository alertsRepository, IAlertService alertService)
+        private readonly IHubContext<AlertHub> _hubContext;
+        private readonly IClientProxy clientProxy;
+        public AlertsController(IAlertsRepository alertsRepository, IAlertService alertService, IHubContext hubContext)
         {
             this.alertsRepository = alertsRepository;
             this.alertService = alertService;
+            //_hubContext = (IHubContext<AlertHub>?)hubContext;
         }
 
         [HttpPost("updatestock/{assetId}")]
@@ -23,7 +27,7 @@ namespace AssetNex.API.Controllers
         {
 
             await alertService.CheckAndBroadcastLowStockAsync(assetId, newStock);
-
+            //await _hubContext.Clients.All.SendAsync("Low Quantity");
             return Ok(new { Message = "Stock updated and alert check triggered successfully" });
         }
 

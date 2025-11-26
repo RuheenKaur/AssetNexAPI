@@ -61,6 +61,7 @@ namespace AssetNex.API.Controllers
                 authClaims.Add(new Claim(ClaimTypes.Role, role));
             }
 
+
             var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
 
             var token = new JwtSecurityToken(
@@ -83,16 +84,33 @@ namespace AssetNex.API.Controllers
             db.RefreshTokenModel.Add(refreshToken);
             await db.SaveChangesAsync();
 
+            var userRoless = await _userManager.GetRolesAsync(user);
+            var primaryRole = userRoless.FirstOrDefault();
+
             return Ok(new
             {
                 accessToken = new JwtSecurityTokenHandler().WriteToken(token),
                 refreshToken = refreshToken.Token,
                 expiration = token.ValidTo,
-
-
-
+                email = user.Email,
+                role = primaryRole
             });
+
+
         }
+
+        //[HttpPost("assign-role")]
+        //public async Task<IActionResult> AssignRole([FromQuery] string email, [FromQuery] string role)
+        //{
+        //    var user = await _userManager.FindByEmailAsync(email);
+        //    if (user == null) return NotFound("User not found");
+
+        //    var result = await _userManager.AddToRoleAsync(user, role);
+        //    if (result.Succeeded) return Ok("Role assigned");
+
+        //    return BadRequest(result.Errors);
+        //}
+
 
 
         [HttpPost("create-role")]
@@ -140,7 +158,7 @@ namespace AssetNex.API.Controllers
                 });
             }
 
-            var roleResult = await _userManager.AddToRoleAsync(user, "Reader");
+            var roleResult = await _userManager.AddToRoleAsync(user, "User");
             if (!roleResult.Succeeded)
             {
                 return Ok(new RegisterResponseDto

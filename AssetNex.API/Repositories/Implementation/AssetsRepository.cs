@@ -17,19 +17,10 @@ namespace AssetNex.API.Repositories.Implementation
             this.dbContext = dbContext;
 
         }
-
-
-
         public async Task<List<AssetInfo>> getAllAssets()
         {
-
-            return await dbContext.AssetInfo
-
-     .Include(a => a.AssetType)
-     .ToListAsync();
-
+            return await dbContext.AssetInfo.Include(a => a.AssetType).ToListAsync();
         }
-
         public async Task AddAssetAsync(AssetInfo asset)
         {
             await dbContext.AssetInfo.AddAsync(asset);
@@ -59,7 +50,6 @@ namespace AssetNex.API.Repositories.Implementation
                 return asset;
 
             }
-
             return null;
         }
 
@@ -67,26 +57,21 @@ namespace AssetNex.API.Repositories.Implementation
         {
             return await dbContext.AssetInfo.FirstOrDefaultAsync(x => x.Id == id);
         }
-
-        public async Task<AssetInfo?> DeleteAsync(Guid id)
+        public async Task<bool> DeleteAsync(Guid id)
         {
             var existingAsset = await dbContext.AssetInfo.FirstOrDefaultAsync(x => x.Id == id);
 
-            if (existingAsset != null)
+            if (existingAsset == null)
             {
-                return null;
-
+                return false;
             }
 
             dbContext.AssetInfo.Remove(existingAsset);
             await dbContext.SaveChangesAsync();
-            return existingAsset;
+
+            return true;
         }
-
-
-
-
-
     }
 }
+
 

@@ -4,6 +4,7 @@ using AssetNex.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AssetNex.API.Migrations.AuthDb
 {
     [DbContext(typeof(AuthDbContext))]
-    partial class AuthDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251125094627_NewAuthMigration")]
+    partial class NewAuthMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -77,22 +80,6 @@ namespace AssetNex.API.Migrations.AuthDb
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "463fb724-bf6a-459d-95d2-6e338fe4baf7",
-                            ConcurrencyStamp = "463fb724-bf6a-459d-95d2-6e338fe4baf7",
-                            Name = "Reader",
-                            NormalizedName = "READER"
-                        },
-                        new
-                        {
-                            Id = "570c928b-79ab-4090-bf75-e0cde29a0315",
-                            ConcurrencyStamp = "570c928b-79ab-4090-bf75-e0cde29a0315",
-                            Name = "Writer",
-                            NormalizedName = "WRITER"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -183,40 +170,6 @@ namespace AssetNex.API.Migrations.AuthDb
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "f61f8473-db02-4312-b6a5-5871844da9cf",
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "STATIC-CONCURRENCY-STAMP-12345",
-                            Email = "admin@assetnex.com",
-                            EmailConfirmed = true,
-                            LockoutEnabled = false,
-                            NormalizedEmail = "ADMIN@ASSETNEX.COM",
-                            NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAECksSwnnAph3F8RGFvP/wLJx8lQRTdTt0ttF2rWb6lM3MJfZ7X8Zj/olc/Jlz2twPw==",
-                            PhoneNumberConfirmed = false,
-                            SecurityStamp = "STATIC-SECURITY-STAMP-12345",
-                            TwoFactorEnabled = false,
-                            UserName = "admin"
-                        },
-                        new
-                        {
-                            Id = "g72g9584-ec13-5423-c7b6-698255eb1eg",
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "STATIC-CONCURRENCY-STAMP-12345",
-                            Email = "user@demo.com",
-                            EmailConfirmed = true,
-                            LockoutEnabled = false,
-                            NormalizedEmail = "USER@DEMO.COM",
-                            NormalizedUserName = "USER",
-                            PasswordHash = "N2uIDYJOcFA4bBd2vnAMhM6arpJRBDn6CVxdSTTCwdPGzhSsz6D3ETHPd9BhmFLvYJUWf5qxhyDFcnnrAKd19w==",
-                            PhoneNumberConfirmed = false,
-                            SecurityStamp = "STATIC-SECURITY-STAMP-12345",
-                            TwoFactorEnabled = false,
-                            UserName = "user"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -279,28 +232,6 @@ namespace AssetNex.API.Migrations.AuthDb
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            UserId = "f61f8473-db02-4312-b6a5-5871844da9cf",
-                            RoleId = "463fb724-bf6a-459d-95d2-6e338fe4baf7"
-                        },
-                        new
-                        {
-                            UserId = "f61f8473-db02-4312-b6a5-5871844da9cf",
-                            RoleId = "570c928b-79ab-4090-bf75-e0cde29a0315"
-                        },
-                        new
-                        {
-                            UserId = "g72g9584-ec13-5423-c7b6-698255eb1eg",
-                            RoleId = "463fb724-bf6a-459d-95d2-6e338fe4baf7"
-                        },
-                        new
-                        {
-                            UserId = "g72g9584-ec13-5423-c7b6-698255eb1eg",
-                            RoleId = "570c928b-79ab-4090-bf75-e0cde29a0315"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>

@@ -117,7 +117,6 @@ namespace AssetNex.API.Controllers
                     };
 
                     return Ok(response);
-
                 }
 
             }
