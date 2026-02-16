@@ -2,6 +2,7 @@
 using AssetNex.API.Models.DomainModel;
 using AssetNex.API.Models.DTO.SoftwareLicense;
 using AssetNex.API.Repositories.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AssetNex.API.Controllers
@@ -38,6 +39,9 @@ namespace AssetNex.API.Controllers
 
             return Ok(response);
         }
+
+
+
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)

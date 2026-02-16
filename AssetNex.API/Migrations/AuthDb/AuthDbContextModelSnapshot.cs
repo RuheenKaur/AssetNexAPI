@@ -17,7 +17,7 @@ namespace AssetNex.API.Migrations.AuthDb
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.9")
+                .HasAnnotation("ProductVersion", "8.0.20")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -194,16 +194,16 @@ namespace AssetNex.API.Migrations.AuthDb
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@ASSETNEX.COM",
-                            NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAECksSwnnAph3F8RGFvP/wLJx8lQRTdTt0ttF2rWb6lM3MJfZ7X8Zj/olc/Jlz2twPw==",
+                            NormalizedUserName = "ADMIN@ASSETNEX.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEJkxsnEzw9Aa+5kAuwYbOQgEc8jgyegwWOBqZFWjr6IHVSig1kTsiArMCA10lI3d1Q==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "STATIC-SECURITY-STAMP-12345",
                             TwoFactorEnabled = false,
-                            UserName = "admin"
+                            UserName = "admin@assetnex.com"
                         },
                         new
                         {
-                            Id = "g72g9584-ec13-5423-c7b6-698255eb1eg",
+                            Id = "b72b9584-ec13-4423-c7b6-698255eb11e9",
                             AccessFailedCount = 0,
                             ConcurrencyStamp = "STATIC-CONCURRENCY-STAMP-12345",
                             Email = "user@demo.com",
@@ -293,12 +293,12 @@ namespace AssetNex.API.Migrations.AuthDb
                         },
                         new
                         {
-                            UserId = "g72g9584-ec13-5423-c7b6-698255eb1eg",
+                            UserId = "b72b9584-ec13-4423-c7b6-698255eb11e9",
                             RoleId = "463fb724-bf6a-459d-95d2-6e338fe4baf7"
                         },
                         new
                         {
-                            UserId = "g72g9584-ec13-5423-c7b6-698255eb1eg",
+                            UserId = "b72b9584-ec13-4423-c7b6-698255eb11e9",
                             RoleId = "570c928b-79ab-4090-bf75-e0cde29a0315"
                         });
                 });

@@ -14,13 +14,14 @@
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "swagger",
-        "environmentVariables": {
-            "ASPNETCORE_ENVIRONMENT": "Development",
-            "APIKEY": "jhdjkswjdkpou382u9201assetnexapi3"
-        },
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "APIKEY": "jhdjkswjdkpou382u9201assetnexapi3"
+      },
       "dotnetRunMessages": true,
       "applicationUrl": "https://localhost:7195"
     },
+
     "IIS Express": {
       "commandName": "IISExpress",
       "workingDirectory": "C:\\Users\\DELL\\.dotnet",

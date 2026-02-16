@@ -9,7 +9,6 @@ namespace AssetNex.API.Controllers
 
     [ApiController]
     [Route("api/[controller]")]
-
     public class AssetsController : ControllerBase
 
     {
@@ -19,6 +18,7 @@ namespace AssetNex.API.Controllers
 
         public AssetsController(IAssetsRepository assetsRepository, ApplicationDbContext dbContext)
         {
+
             this.assetsRepository = assetsRepository;
             this.dbContext = dbContext;
         }

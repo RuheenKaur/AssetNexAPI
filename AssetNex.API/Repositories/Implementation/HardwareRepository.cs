@@ -1,6 +1,7 @@
 ﻿using AssetNex.API.Data;
 using AssetNex.API.Models.DomainModel;
 using AssetNex.API.Repositories.Interface;
+using Duende.IdentityServer.Events;
 using Microsoft.EntityFrameworkCore;
 
 namespace AssetNex.API.Repositories.Implementation
@@ -55,6 +56,8 @@ namespace AssetNex.API.Repositories.Implementation
             }
             return null;
         }
+
+      
         public async Task<Hardware?> DeleteAsync(Guid id)
         {
             var existingAsset = await dbContext.Hardware.FirstOrDefaultAsync(x => x.Id == id);

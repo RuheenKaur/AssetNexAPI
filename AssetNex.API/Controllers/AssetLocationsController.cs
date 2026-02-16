@@ -23,8 +23,6 @@ namespace AssetNex.API.Controllers
             this.dbContext = dbContext;
         }
 
-
-
         [HttpGet]
         public async Task<IActionResult> GetAllAssetLocations()
         {
@@ -71,17 +69,6 @@ namespace AssetNex.API.Controllers
             dbContext.AssetLocations.Add(asset);
             dbContext.SaveChanges();
             return Ok(asset);
-        }
-
-
-        private object GetByLocationId()
-        {
-            throw new NotImplementedException();
-        }
-
-        private IActionResult CreatedAtAction(AssetLocationDto response)
-        {
-            throw new NotImplementedException();
         }
     }
 

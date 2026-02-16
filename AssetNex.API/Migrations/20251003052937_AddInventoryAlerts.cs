@@ -8,7 +8,6 @@ namespace AssetNex.API.Migrations
     /// <inheritdoc />
     public partial class AddInventoryAlerts : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(

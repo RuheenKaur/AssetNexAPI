@@ -34,7 +34,7 @@ namespace AssetNex.API.Services
             if (asset.StockQuantity <= asset.Threshold)
             {
                 var alert = new InventoryAlert
-                {
+                {   
                     AssetId = asset.Id,
                     AssetName = asset.AssetName,
                     StockQuantity = asset.StockQuantity,
