@@ -1,17 +1,21 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /app
+WORKDIR /src
 
-COPY *.csproj ./
-RUN dotnet restore
+# Copy everything first
+COPY . .
 
-COPY . ./
-RUN dotnet publish -c Release -o out
+# Find the .csproj file and restore
+RUN find . -name '*.csproj' -exec dotnet restore {} \;
+
+# Build and publish (finds the project automatically)
+RUN dotnet publish -c Release -o /app/publish
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
-COPY --from=build /app/out .
+COPY --from=build /app/publish .
 
 ENV ASPNETCORE_URLS=http://+:$PORT
 EXPOSE $PORT
 
+# Start the DLL (make sure this matches your actual DLL name)
 ENTRYPOINT ["dotnet", "AssetNex.API.dll"]
