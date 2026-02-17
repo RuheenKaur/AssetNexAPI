@@ -1,13 +1,21 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy everything
+# Copy the solution file first
+COPY *.sln .
+
+# Copy the project file
+COPY AssetNex.API/*.csproj ./AssetNex.API/
+
+# Restore ALL packages including Asp.Versioning
+RUN dotnet restore AssetNex.API/AssetNex.API.csproj
+
+# Copy everything else
 COPY . .
 
-# The .csproj is in AssetNex.API folder
+# Publish
 WORKDIR /src/AssetNex.API
-RUN dotnet restore AssetNex.API.csproj
-RUN dotnet publish AssetNex.API.csproj -c Release -o /app/publish
+RUN dotnet publish AssetNex.API.csproj -c Release -o /app/publish --no-restore
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
