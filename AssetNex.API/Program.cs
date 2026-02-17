@@ -119,7 +119,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddApiVersioning(options =>
 {
-    options.DefaultApiVersion = new ApiVersion(1, 0);
+    
     options.AssumeDefaultVersionWhenUnspecified = true;
     options.ReportApiVersions = true;
 });// addapiversioning is an extension method, takes an ApiVersioningObjects 
