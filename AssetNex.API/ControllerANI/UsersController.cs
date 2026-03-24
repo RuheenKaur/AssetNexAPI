@@ -2,7 +2,6 @@
 using AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DTOANI.SupportTicket;
 using AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DTOANI.User;
 using AssetNexAPI.AssetNexITAPI.AssetNex.API.RepositoriesANI.RepInterface;
-using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI

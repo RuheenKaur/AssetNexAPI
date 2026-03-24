@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>56fffbba-0164-46bf-b33a-68869cc79b41</UserSecretsId>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,63 +28,23 @@
 
   <ItemGroup>
     <Compile Remove="Controllers\UserManagementController.cs" />
-    <Compile Remove="Migrations\20250620070334_CreateSupportTable.cs" />
-    <Compile Remove="Migrations\20250620070334_CreateSupportTable.Designer.cs" />
-    <Compile Remove="Migrations\20250624045648_UpdatedSupportRequestTable.cs" />
-    <Compile Remove="Migrations\20250624045648_UpdatedSupportRequestTable.Designer.cs" />
-    <Compile Remove="Migrations\20250625052048_AddSoftwareLicenseSchema.cs" />
-    <Compile Remove="Migrations\20250625052048_AddSoftwareLicenseSchema.Designer.cs" />
-    <Compile Remove="Migrations\20250626052647_AddSupportRequestandSoftwareLicenseInfoTables.cs" />
-    <Compile Remove="Migrations\20250626052647_AddSupportRequestandSoftwareLicenseInfoTables.Designer.cs" />
-    <Compile Remove="Migrations\20250626060113_SupportReqsTable.cs" />
-    <Compile Remove="Migrations\20250626060113_SupportReqsTable.Designer.cs" />
-    <Compile Remove="Migrations\20250627114132_UpdateSofwareLicenseTable.cs" />
-    <Compile Remove="Migrations\20250627114132_UpdateSofwareLicenseTable.Designer.cs" />
-    <Compile Remove="Migrations\20250629183915_AddSoftwareLicenseTable.cs" />
-    <Compile Remove="Migrations\20250629183915_AddSoftwareLicenseTable.Designer.cs" />
-    <Compile Remove="Models\DTO\DisposeAssetRequestDto.cs" />
-    <Compile Remove="Models\DTO\SoftwareLicense\UpdateSoftwareLicenseDto.cs" />
     <Compile Remove="WeatherForecast.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    
     <PackageReference Include="Asp.Versioning.Http" Version="8.1.1" />
-    
     <PackageReference Include="Asp.Versioning.Mvc" Version="8.1.1" />
-    
     <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.1" />
-    
+    <PackageReference Include="AutoMapper" Version="16.1.1" />
     <PackageReference Include="Dropbox.Api" Version="7.0.0" />
-    
-    <PackageReference Include="Microsoft.AspNetCore.ApiAuthorization.IdentityServer" Version="7.0.20" />
-    
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.17" />
-    
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.17" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="8.0.19" />
-    
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.2.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.9" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.9" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.9">
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0">
       <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Identity.Client" Version="4.77.0" />
-    <PackageReference Include="Microsoft.IdentityModel.Logging" Version="8.15.0" />
-    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.14.0" />
-    <PackageReference Include="Serilog" Version="4.3.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
-    <PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
-    <PackageReference Include="Serilog.Extensions.Logging" Version="9.0.2" />
-    <PackageReference Include="Serilog.Extensions.Logging.File" Version="3.0.0" />
-    <PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
-    <PackageReference Include="Serilog.Sinks.EventLog" Version="4.0.0" />
-    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.8.0" />
   </ItemGroup>
@@ -92,8 +52,5 @@
   <ItemGroup>
     <Folder Include="wwwroot\" />
   </ItemGroup>
-	<PropertyGroup>
-		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-	</PropertyGroup>
 
 </Project>
