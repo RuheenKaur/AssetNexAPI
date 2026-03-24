@@ -1,4 +1,5 @@
-﻿using AssetNex.API.Data;
+﻿using Asp.Versioning;
+using AssetNex.API.Data;
 using AssetNex.API.Hubs;
 using AssetNex.API.Models.DomainModel;
 using AssetNex.API.RepositoriesANI.RepImplementation;
@@ -17,7 +18,7 @@ using static AssetNex.API.Controllers.AuthController;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ─── Core Services ────────────────────────────────────────────────────────────
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddMemoryCache();
@@ -25,11 +26,10 @@ builder.Services.AddSignalR();
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
-// ─── JWT Settings ─────────────────────────────────────────────────────────────
 builder.Services.Configure<JwtSettings>(
     builder.Configuration.GetSection("JwtSettings"));
 
-// ─── Database Contexts ────────────────────────────────────────────────────────
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("AssetNexConnection")));
 
@@ -39,7 +39,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("AuthDbConnection")));
 
-// ─── Repository & Service Registrations ──────────────────────────────────────
+
 builder.Services.AddScoped<IAssetsAssignmentRep, AssetsAssignmentRep>();
 builder.Services.AddScoped<IAssetsRequestsRep, AssetsRequestsRep>();
 builder.Services.AddScoped<IAssetsHistoryRep, AssetHistoryRep>();
@@ -49,7 +49,6 @@ builder.Services.AddScoped<IAssetSoftwareRep, AssetSoftwareRep>();
 builder.Services.AddScoped<ISupportTicketService, SupportTicketService>();
 builder.Services.AddScoped<ISupportTicketsRep, SupportTicketsRep>();
 
-// ─── Identity (AddIdentity overrides cookie defaults — JWT takes over) ────────
 builder.Services
     .AddIdentity<IdentityUser, IdentityRole>(options =>
     {
