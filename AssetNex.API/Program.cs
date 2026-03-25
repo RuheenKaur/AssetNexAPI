@@ -169,9 +169,13 @@ using (var scope = app.Services.CreateScope())
 
 Console.WriteLine("JWT KEY -> " + builder.Configuration["JwtSettings:Key"]);
 
-    app.UseSwagger();
-    app.UseSwaggerUI();
 
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "AssetNexIT API v1");
+    c.RoutePrefix = "swagger";
+});
 app.UseStaticFiles(); 
 app.UseCors("AllowAngular");
 app.UseHttpsRedirection();
