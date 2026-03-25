@@ -169,7 +169,7 @@ using (var scope = app.Services.CreateScope())
 
 Console.WriteLine("JWT KEY -> " + builder.Configuration["JwtSettings:Key"]);
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
