@@ -1,4 +1,4 @@
-﻿name: Deploy API to Azure
+name: Deploy API to Azure
 on:
   push:
     branches: [main]
@@ -31,7 +31,7 @@ jobs:
         run: dotnet build --configuration Release --no-restore
       - name: Publish API
         working-directory: ./AssetNex.API
-        run: dotnet publish --configuration Release --no-build --output ${{github.workspace}}/publish
+        run: dotnet publish --configuration Release --output ${{github.workspace}}/publish
       - name: Deploy to Azure App Service
         uses: azure/webapps-deploy@v3
         with:
