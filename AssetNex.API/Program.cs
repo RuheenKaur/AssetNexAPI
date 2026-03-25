@@ -163,10 +163,12 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-var services = scope.ServiceProvider;
-    //await IdentitySeeder.SeedAsync(services);
+    var services = scope.ServiceProvider;
+    var db = services.GetRequiredService<AppDbContext>();
+    await db.Database.MigrateAsync();
+    var authDb = services.GetRequiredService<AuthDbContext>();
+    await authDb.Database.MigrateAsync();
 }
-
 Console.WriteLine("JWT KEY -> " + builder.Configuration["JwtSettings:Key"]);
 
 app.UseRouting();
