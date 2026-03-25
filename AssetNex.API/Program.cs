@@ -9,7 +9,6 @@ using AssetNexAPI.AssetNexITAPI.AssetNex.API.RepositoriesANI.RepInterface;
 using AssetNexAPI.AssetNexITAPI.AssetNex.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -18,16 +17,12 @@ using static AssetNex.API.Controllers.AuthController;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-
-
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddMemoryCache();
 builder.Services.AddSignalR();
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
-
 builder.Services.Configure<JwtSettings>(
     builder.Configuration.GetSection("JwtSettings"));
 
@@ -117,7 +112,7 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-// ─── API Versioning ───────────────────────────────────────────────────────────
+
 builder.Services.AddApiVersioning(options =>
 {
     options.AssumeDefaultVersionWhenUnspecified = true;
@@ -125,7 +120,6 @@ builder.Services.AddApiVersioning(options =>
     options.ReportApiVersions = true;
 });
 
-// ─── Swagger with JWT Support ─────────────────────────────────────────────────
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "AssetNexIT API", Version = "v1" });
@@ -154,7 +148,6 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// ─── CORS ─────────────────────────────────────────────────────────────────────
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular",
@@ -168,7 +161,6 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// ─── Seed Identity Users/Roles ────────────────────────────────────────────────
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -177,19 +169,16 @@ using (var scope = app.Services.CreateScope())
 
 Console.WriteLine("JWT KEY -> " + builder.Configuration["JwtSettings:Key"]);
 
-// ─── Middleware Pipeline ──────────────────────────────────────────────────────
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseStaticFiles(); // serves wwwroot (Angular build)
-
+app.UseStaticFiles(); 
 app.UseCors("AllowAngular");
-
 app.UseHttpsRedirection();
-app.UseAuthentication();  // must come before UseAuthorization
+app.UseAuthentication(); 
 
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
@@ -204,6 +193,14 @@ app.MapGet("/test", () => "Working");
 app.MapHub<AlertHub>("/hubs/alerts");
 app.MapGet("/", () => "RUNNING ✅");
 app.Logger.LogInformation("AssetNexIT API Started");
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await db.Database.MigrateAsync();
+
+    var authDb = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
+    await authDb.Database.MigrateAsync();
+}
 app.Run();
 
 public partial class Program { }

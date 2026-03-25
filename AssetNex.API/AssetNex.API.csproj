@@ -4,6 +4,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+	  <PublishReadyToRun>false</PublishReadyToRun>
+    <SelfContained>false</SelfContained>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 
@@ -50,6 +52,7 @@
     <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.8.0" />
+	  <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.6" />
     <PackageReference Include="xunit" Version="2.9.3" />
   </ItemGroup>
 
