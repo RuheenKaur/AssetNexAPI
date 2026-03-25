@@ -163,28 +163,27 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
-    //await IdentitySeeder.SeedAsync(services);
+var services = scope.ServiceProvider;
+//await IdentitySeeder.SeedAsync(services);
 }
 
 Console.WriteLine("JWT KEY -> " + builder.Configuration["JwtSettings:Key"]);
 
-
+app.UseRouting();
 app.UseSwagger();
 app.UseSwaggerUI();
-
 app.UseStaticFiles();
-app.UseRouting();          // MUST be before auth and cors
 app.UseCors("AllowAngular");
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseMiddleware<RequestLoggingMiddleware>();
-
 app.MapControllers();
 app.MapGet("/test", () => "Working");
 app.MapHub<AlertHub>("/hubs/alerts");
 app.MapGet("/", () => "RUNNING ✅");
+app.Logger.LogInformation("AssetNexIT API Started");
+app.Run();
+
 public partial class Program { }
