@@ -1,6 +1,8 @@
 ﻿using AssetNex.API.Models.DomainModel;
 using AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DomainModelsANI;
 using AssetNexAPI.AssetNexITAPI.AssetNex.API.RepositoriesANI.RepInterface;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,9 +11,9 @@ using System.Runtime.InteropServices;
 
 namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI
 {
-    [ApiController]
-
-    [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+     [Route("api/[controller]")]
+         [ApiController]
     public class AssetsMasterController : ControllerBase
     {
         private readonly IAssetsMasterRep _repo;

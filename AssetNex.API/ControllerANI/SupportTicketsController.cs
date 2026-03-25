@@ -2,12 +2,16 @@
 using AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DTOANI.SupportTicket;
 using AssetNexAPI.AssetNexITAPI.AssetNex.API.RepositoriesANI.RepInterface;
 using AssetNexAPI.AssetNexITAPI.AssetNex.API.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 using Microsoft.EntityFrameworkCore;
 
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+[Route("api/support-tickets")]
 [ApiController]
 
-[Route("api/support-tickets")]
 public class SupportTicketsController : ControllerBase
 {
     private readonly ISupportTicketsRep _repo;

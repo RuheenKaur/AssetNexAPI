@@ -19,6 +19,8 @@ using static AssetNex.API.Controllers.AuthController;
 var builder = WebApplication.CreateBuilder(args);
 
 
+
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddMemoryCache();
@@ -61,7 +63,7 @@ builder.Services
     .AddEntityFrameworkStores<AuthDbContext>()
     .AddDefaultTokenProviders();
 
-// Override cookie redirect to return 401/403 instead of redirecting to login page
+
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Events.OnRedirectToLogin = context =>
@@ -76,7 +78,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     };
 });
 
-// ─── JWT Authentication ───────────────────────────────────────────────────────
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -97,7 +99,7 @@ builder.Services.AddAuthentication(options =>
             Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"]!))
     };
 
-    // Allow JWT via query string for SignalR hubs
+    
     options.Events = new JwtBearerEvents
     {
         OnMessageReceived = context =>
@@ -163,15 +165,14 @@ builder.Services.AddCors(options =>
             .AllowCredentials());
 });
 
-// ═════════════════════════════════════════════════════════════════════════════
+
 var app = builder.Build();
-// ═════════════════════════════════════════════════════════════════════════════
 
 // ─── Seed Identity Users/Roles ────────────────────────────────────────────────
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    await IdentitySeeder.SeedAsync(services);
+    //await IdentitySeeder.SeedAsync(services);
 }
 
 Console.WriteLine("JWT KEY -> " + builder.Configuration["JwtSettings:Key"]);
@@ -188,16 +189,21 @@ app.UseStaticFiles(); // serves wwwroot (Angular build)
 app.UseCors("AllowAngular");
 
 app.UseHttpsRedirection();
-app.UseRouting();
 app.UseAuthentication();  // must come before UseAuthorization
-app.UseAuthorization();
+
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
-app.UseMiddleware<RequestLoggingMiddleware>();
-
+app.UseRouting();
+app.UseAuthorization();
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+});
 app.MapControllers();
+app.MapGet("/test", () => "Working");
 app.MapHub<AlertHub>("/hubs/alerts");
-
+app.MapGet("/", () => "RUNNING ✅");
 app.Logger.LogInformation("AssetNexIT API Started");
-
 app.Run();
+
+public partial class Program { }
