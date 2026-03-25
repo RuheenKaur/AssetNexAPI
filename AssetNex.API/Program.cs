@@ -171,37 +171,20 @@ Console.WriteLine("JWT KEY -> " + builder.Configuration["JwtSettings:Key"]);
 
 
 app.UseSwagger();
-app.UseSwaggerUI(c =>
-{
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "AssetNexIT API v1");
-    c.RoutePrefix = string.Empty;
-});
-app.UseStaticFiles(); 
+app.UseSwaggerUI();
+
+app.UseStaticFiles();
+app.UseRouting();          // MUST be before auth and cors
 app.UseCors("AllowAngular");
 app.UseHttpsRedirection();
-app.UseAuthentication(); 
-
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
-app.UseRouting();
-app.UseAuthorization();
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();
-});
+app.UseMiddleware<RequestLoggingMiddleware>();
+
 app.MapControllers();
 app.MapGet("/test", () => "Working");
 app.MapHub<AlertHub>("/hubs/alerts");
 app.MapGet("/", () => "RUNNING ✅");
-app.Logger.LogInformation("AssetNexIT API Started");
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await db.Database.MigrateAsync();
-
-    var authDb = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
-    await authDb.Database.MigrateAsync();
-}
-app.Run();
-
 public partial class Program { }
