@@ -6,18 +6,49 @@ using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
 using Xunit;
+using Microsoft.EntityFrameworkCore.InMemory;
+using AssetNex.API.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 public class TicketsControllerIntegrationTests
     : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly HttpClient _client;
-    public TicketsControllerIntegrationTests(
-        WebApplicationFactory<Program> factory)
+
+
+    public TicketsControllerIntegrationTests(WebApplicationFactory<Program> factory)
     {
+
         _client = factory.CreateClient();
+
+        _client.DefaultRequestHeaders.Authorization =
+    new AuthenticationHeaderValue("Bearer", GenerateTestToken());
+        _client = factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                var descriptor = services.SingleOrDefault(
+                    d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+                if (descriptor != null) services.Remove(descriptor);
+
+                var authDescriptor = services.SingleOrDefault(
+                    d => d.ServiceType == typeof(DbContextOptions<AuthDbContext>));
+                if (authDescriptor != null) services.Remove(authDescriptor);
+
+              
+                services.AddDbContext<AppDbContext>(options =>
+                    options.UseInMemoryDatabase("TestAppDb"));
+
+                services.AddDbContext<AuthDbContext>(options =>
+                    options.UseInMemoryDatabase("TestAuthDb"));
+            });
+        }).CreateClient();
+
         _client.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", GenerateTestToken());
     }
+   
     private string GenerateTestToken()
     {
         var key = new SymmetricSecurityKey(

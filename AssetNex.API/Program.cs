@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Net.WebSockets;
 using System.Text;
 using static AssetNex.API.Controllers.AuthController;
 
@@ -110,8 +111,12 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddAuthorization();
+//var keyVaultUrl = builder.Configuration["KeyVaultUrl"];
+//builder.Configuration.AddAzureKeyVault(
+//    new Uri(keyVaultUrl),
+//    new Azure.Identity.DefaultAzureCredential());
 
+builder.Services.AddAuthorization();
 
 builder.Services.AddApiVersioning(options =>
 {
@@ -152,7 +157,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular",
         policy => policy
-            .WithOrigins("http://localhost:4200", "https://localhost:4200")
+            .WithOrigins(
+                "http://localhost:4200",
+                "https://localhost:4200",
+                "https://assetnexangular.z29.web.core.windows.net")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials());
@@ -162,13 +170,19 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
+
 {
     var services = scope.ServiceProvider;
-    var db = services.GetRequiredService<AppDbContext>();
+    var db = services.GetRequiredService<DbContext>();
     await db.Database.MigrateAsync();
     var authDb = services.GetRequiredService<AuthDbContext>();
     await authDb.Database.MigrateAsync();
+
 }
+
+
+
+
 Console.WriteLine("JWT KEY -> " + builder.Configuration["JwtSettings:Key"]);
 
 app.UseRouting();
