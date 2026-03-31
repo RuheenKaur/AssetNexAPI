@@ -13,18 +13,22 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using System.Net.WebSockets;
 using System.Text;
 using static AssetNex.API.Controllers.AuthController;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+
 var keyVaultUrl = builder.Configuration["KeyVaultUrl"];
 if (!string.IsNullOrEmpty(keyVaultUrl))
 {
     builder.Configuration.AddAzureKeyVault(
         new Uri(keyVaultUrl),
-        new DefaultAzureCredential());
+        new DefaultAzureCredential(),
+        new AzureKeyVaultConfigurationOptions());
 }
 
 builder.Services.AddControllers();
