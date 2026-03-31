@@ -170,17 +170,20 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
-
 {
-    var services = scope.ServiceProvider;
-    var db = services.GetRequiredService<DbContext>();
-    await db.Database.MigrateAsync();
-    var authDb = services.GetRequiredService<AuthDbContext>();
-    await authDb.Database.MigrateAsync();
-
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        await db.Database.MigrateAsync();
+        var authDb = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
+        await authDb.Database.MigrateAsync();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Migration failed: {ex.Message}");
+        // App continues even if migration fails
+    }
 }
-
-
 
 
 Console.WriteLine("JWT KEY -> " + builder.Configuration["JwtSettings:Key"]);

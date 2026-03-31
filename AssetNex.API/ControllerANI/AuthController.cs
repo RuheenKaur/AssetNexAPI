@@ -87,14 +87,19 @@ namespace AssetNex.API.Controllers
             var userRoless = await _userManager.GetRolesAsync(user);
             var primaryRole = userRoless.FirstOrDefault();
 
+
+
             return Ok(new
             {
                 accessToken = new JwtSecurityTokenHandler().WriteToken(token),
                 refreshToken = refreshToken.Token,
                 expiration = token.ValidTo,
                 email = user.Email,
-                role = primaryRole
+                role = primaryRole,
+                id = user.Id,
+                name = user.UserName
             });
+
 
 
         }
