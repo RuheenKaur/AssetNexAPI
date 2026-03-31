@@ -54,11 +54,12 @@ namespace AssetNex.API.Controllers
                 };
 
 
+     
             var userRoles = await _userManager.GetRolesAsync(user);
             foreach (var role in userRoles)
-
             {
                 authClaims.Add(new Claim(ClaimTypes.Role, role));
+                authClaims.Add(new Claim("role", role)); // ADD THIS LINE
             }
 
 
