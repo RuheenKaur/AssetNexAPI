@@ -6,8 +6,6 @@ using Dropbox.Api.TeamLog;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client;
 using System.Reflection.Metadata.Ecma335;
-using Microsoft.Identity.Client;
-using System.Reflection.Metadata.Ecma335;
 using System.Runtime.InteropServices;
 using static Dropbox.Api.Files.SearchMatchType;
 using AssetNex.API.Models.DTO.Asset;
@@ -29,13 +27,7 @@ public class SupportTicketsRep : ISupportTicketsRep
     }
 
 
-    public async Task Create(SupportTickets ticket)
 
-    {
-        ticket.CreatedAt = DateTime.UtcNow;
-        _context.SupportTickets.Add(ticket);
-        await _context.SaveChangesAsync();
-    }
 
     public async Task<List<SupportTickets>> GetUserTicketsAsync(int createdBy)
     {
@@ -44,51 +36,54 @@ public class SupportTicketsRep : ISupportTicketsRep
             .OrderByDescending(t => t.CreatedAt)
             .ToListAsync();
     }
-   public async Task<List<TicketTrackingDto>> GetUserTicketsWithStatus(int userId)
+
+   
+
+    public async Task<List<TicketTrackingDto>> GetUserTicketsWithStatus(int userId)
     {
-        return await _context.SupportTickets.Where(t => t.CreatedBy == userId).Include(t => t.Asset).Join(
-            _context.StatusMaster,
-            t => t.StatusId,
-            s => s.Id,
-            (t, s) => new TicketTrackingDto
-            { 
+        return await _context.SupportTickets
+            .Where(t => t.CreatedBy == userId)
+            .Include(t => t.Asset)
+            .Include(t => t.Status)
+            .OrderByDescending(t => t.CreatedAt)
+            .Select(t => new TicketTrackingDto
+            {
                 TicketId = t.Id,
                 IssueCategory = t.IssueCategory,
                 IssueDescription = t.IssueDescription,
                 Priority = t.Priority,
-                AssetConcerned = t.Asset != null ? t.Asset.AssetType : "Unknown",   
-                StatusName = s.StatusName,
-                StatusCategory = s.StatusCategory,
-                TicketStatus = s.StatusCode,
-                ResolutionNotes = t.ResolutionNotes
-            }).ToListAsync();
+                AssetConcerned = t.Asset != null ? t.Asset.AssetType : "Unknown",
+                StatusName = t.Status != null ? t.Status.StatusName : "Open",
+                StatusCategory = t.Status != null ? t.Status.StatusCategory : "",
+                ResolutionNotes = t.ResolutionNotes ?? "",
+                CreatedAt = t.CreatedAt
+            })
+            .ToListAsync();
     }
 
-
-
     public async Task<PagedResult<SupportTicketAdminDto>> GetAdminTicketsPagedAsync(
-        int pageNumber,
-        int pageSize,
-        string? search,
-        string? sortField,
-        string? sortOrder)
+         int pageNumber,
+         int pageSize,
+         string? search,
+         string? sortField,
+         string? sortOrder)
     {
         var query = _context.SupportTickets
             .Include(t => t.User)
+            .Include(t => t.Status)
             .Include(t => t.Asset)
             .AsQueryable();
-
-
         if (!string.IsNullOrWhiteSpace(search))
         {
             var searchLower = search.ToLower();
             query = query.Where(t =>
-                (t.IssueCategory != null && t.IssueCategory.ToLower().Contains(searchLower)) ||
+                (t.IssueCategory != null && t.IssueCategory.ToLower() == (searchLower)) ||
                 (t.IssueDescription != null && t.IssueDescription.ToLower().Contains(searchLower)) ||
                 (t.User != null && t.User.Name.ToLower().Contains(searchLower)) ||
                 (t.Asset != null && t.Asset.AssetType.ToLower().Contains(searchLower))
-            );  
+            );
         }
+
 
 
         query = sortField switch
@@ -121,7 +116,9 @@ public class SupportTicketsRep : ISupportTicketsRep
                 IssueCategory = t.IssueCategory,
                 IssueDescription = t.IssueDescription,
                 Priority = t.Priority,
-                CreatedAt = t.CreatedAt
+                CreatedAt = t.CreatedAt,
+                 StatusId= t.StatusId,
+                Status = t.Status != null ? t.Status.StatusName : "Open",
             })
             .ToListAsync();
 
@@ -150,21 +147,15 @@ public class SupportTicketsRep : ISupportTicketsRep
 
     }
 
-    public async Task<List<TicketComment>> GetCommentsByTicketAsync(int ticketId)
+    public async Task<List<TicketComment>> GetCommentsByTicketIdAsync(int ticketId)
     {
         return await _context.TicketComments.Where(c => c.TicketId == ticketId).OrderBy(
             c => c.CreatedAt).AsNoTracking().ToListAsync();
     }
-   
 
-    public async Task<List<TicketComment>> GetCommentsByTicketIdAsync(int ticketId)
-    {
-        return await _context.TicketComments.Where(c => c.TicketId == ticketId).OrderBy(c => c.CreatedAt)
-            .AsNoTracking().ToListAsync();
 
-    }
 
-    
+
     public async Task<List<object>> GetAssignedAssetsByUserAsync(int createdBy)
     {
         return await _context.SupportTickets
@@ -182,16 +173,3 @@ public class SupportTicketsRep : ISupportTicketsRep
 
 }
 
-//[Fact]
-//public void Pagination_SkipCalculation_IsCorrect()
-//{
-//    // Arrange
-//    int pageNumber = 2;
-//    int pageSize = 10;
-
-//    // Act
-//    int skip = (pageNumber - 1) * pageSize;
-
-//    // Assert
-//    Assert.Equal(10, skip); // Page 2 should skip first 10 records
-//}

@@ -10,113 +10,107 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace AssetNex.API.Controllers
 {
     [Route("api/[controller]")]
-
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
         private readonly JwtSettings _jwtSettings;
         private readonly ILogger<AuthController> _logger;
+         private readonly AppDbContext _appDb;
 
-        public AuthController(
-            UserManager<IdentityUser> userManager,
-            IConfiguration configuration,
-            IOptions<JwtSettings> jwtOptions,
+       
 
-            ILogger<AuthController> logger)
-        {
-            _userManager = userManager;
-            _configuration = configuration;
-            _jwtSettings = jwtOptions.Value;
-            _logger = logger;
+             public AuthController(
+     UserManager<ApplicationUser> userManager,
+     IConfiguration configuration,
+     IOptions<JwtSettings> jwtOptions,
+     ILogger<AuthController> logger,
+     AppDbContext appDb)
+  
+         {
+     _userManager = userManager;
+     _configuration = configuration;
+     _jwtSettings = jwtOptions.Value;
+     _logger = logger;
+     _appDb = appDb; 
+ }
 
-        }
+      
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
         {
             var user = await _userManager.FindByEmailAsync(request.Email);
-
             if (user == null || !await _userManager.CheckPasswordAsync(user, request.Password))
                 return Unauthorized("Invalid email or password");
+            var customUser = await _appDb.Users
+                .FirstOrDefaultAsync(u => u.Email == request.Email);
 
+            if (customUser == null)
+                return Unauthorized("User profile not found");
 
             var authClaims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+    {
+        new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
+        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+        new Claim(ClaimTypes.NameIdentifier, customUser.Id.ToString()),
+    };
 
-                };
-
-
-     
             var userRoles = await _userManager.GetRolesAsync(user);
             foreach (var role in userRoles)
             {
                 authClaims.Add(new Claim(ClaimTypes.Role, role));
-                authClaims.Add(new Claim("role", role)); // ADD THIS LINE
+                authClaims.Add(new Claim("role", role));
             }
 
-
-            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
+            var authSigningKey = new SymmetricSecurityKey(
+    Encoding.UTF8.GetBytes(_jwtSettings.Key));
 
             var token = new JwtSecurityToken(
                 issuer: _jwtSettings.Issuer,
                 audience: _jwtSettings.Audience,
                 expires: DateTime.Now.AddHours(_jwtSettings.ExpiryHours),
                 claims: authClaims,
-                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
+                signingCredentials: new SigningCredentials(
+                authSigningKey, SecurityAlgorithms.HmacSha256)
             );
 
-            var refreshToken = new RefreshTokenModel
-            {
-                Token = GenerateRefreshToken(),
-                UserId = user.Id,
-                Expiry = DateTime.UtcNow.AddDays(7)
-            };
 
+            //var refreshToken = new RefreshTokenModel
+            //{
+            //    Token = GenerateRefreshToken(),
+            //    UserId = user.Id,
+            //    Expiry = DateTime.UtcNow.AddDays(7)
+            //};
 
-            var db = HttpContext.RequestServices.GetRequiredService<AuthDbContext>();
-            db.RefreshTokenModel.Add(refreshToken);
-            await db.SaveChangesAsync();
+            //var db = HttpContext.RequestServices.GetRequiredService<AuthDbContext>();
+            //db.RefreshTokenModel.Add(refreshToken);
+            //await db.SaveChangesAsync();
 
-            var userRoless = await _userManager.GetRolesAsync(user);
-            var primaryRole = userRoless.FirstOrDefault();
+            var primaryRole = userRoles.FirstOrDefault();
 
 
 
             return Ok(new
             {
                 accessToken = new JwtSecurityTokenHandler().WriteToken(token),
-                refreshToken = refreshToken.Token,
+                //refreshToken = refreshToken.Token,
                 expiration = token.ValidTo,
                 email = user.Email,
                 role = primaryRole,
                 id = user.Id,
-                name = user.UserName
+                numericId = customUser != null ? customUser.Id : 0,
+                name = customUser != null ? customUser.Name : user.Email,
+                contact = customUser != null ? customUser.Contact : user.Contact
             });
-
-
-
         }
-
-        //[HttpPost("assign-role")]
-        //public async Task<IActionResult> AssignRole([FromQuery] string email, [FromQuery] string role)
-        //{
-        //    var user = await _userManager.FindByEmailAsync(email);
-        //    if (user == null) return NotFound("User not found");
-
-        //    var result = await _userManager.AddToRoleAsync(user, role);
-        //    if (result.Succeeded) return Ok("Role assigned");
-
-        //    return BadRequest(result.Errors);
-        //}
-
 
 
         [HttpPost("create-role")]
@@ -146,7 +140,7 @@ namespace AssetNex.API.Controllers
                 });
             }
 
-            var user = new IdentityUser
+            var user = new ApplicationUser
             {
                 UserName = request.Email?.Trim(),
                 Email = request.Email?.Trim(),

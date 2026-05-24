@@ -9,13 +9,25 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI
     public class AssetsHistoryController : ControllerBase
     {
         private readonly IAssetsHistoryRep _repo;
+
         public AssetsHistoryController(IAssetsHistoryRep repo)
         {
             _repo = repo;
         }
 
         [HttpGet]
-        public IActionResult GetAll() => Ok(_repo.GetAll());
+        public async Task<IActionResult> GetAll()
+        {
+            var result = await _repo.GetAllAsync();
+            return Ok(result);
+        }
+
+        [HttpGet("asset/{assetId}")]
+        public async Task<IActionResult> GetByAsset(int assetId)
+        {
+            var result = await _repo.GetByAssetIdAsync(assetId);
+            return Ok(result);
+        }
 
         [HttpGet("{id}")]
         public IActionResult Get(int id) => Ok(_repo.GetById(id));
@@ -26,7 +38,6 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI
             _repo.Create(history);
             return Ok("History Created");
         }
-
 
         [HttpPut("{id}")]
         public IActionResult Update(int id, AssetsHistory history)
@@ -41,6 +52,6 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI
             _repo.Delete(id);
             return Ok("History Deleted");
         }
+
     }
 }
-

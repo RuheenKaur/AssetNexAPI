@@ -9,6 +9,7 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DTOANI.SupportTicket
         public string Name { get; set; }
         public string Email { get; set; }
         public string Contact { get; set; }
+        public int StatusId { get; set; }
         public string AssetConcerned { get; set; }
         public string IssueCategory { get; set; }
         public string IssueDescription { get; set; }

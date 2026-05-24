@@ -46,48 +46,50 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.RepositoriesANI.RepImplementati
             return await _context.AssetMaster.AsNoTracking().FirstOrDefaultAsync(a => a.Id == statusId);
         }
 
-        public async Task<PagedResultAssets<AssetsMaster>> GetAssetsPagedAsync(int page, int pageSize, string search)
+      
+        public async Task<PagedResultAssets<AssetPagedDto>> GetAssetsPagedAsync(int page, int pageSize, string search)
         {
-            var query = _context.AssetMaster.AsQueryable();
-
+            var query = _context.AssetMaster
+                .AsNoTracking()
+                .AsQueryable();
 
             if (!string.IsNullOrEmpty(search))
             {
-                var searchLower = search.ToLower();
+                var s = search.ToLower();
                 query = query.Where(x =>
-                    (x.AssetTag != null && x.AssetTag.ToLower().Contains(searchLower)) ||
-                    (x.Brand != null && x.Brand.ToLower().Contains(searchLower)) ||
-                    (x.AssetType != null && x.AssetType.ToLower().Contains(searchLower))
+                    (x.AssetTag != null && x.AssetTag.ToLower().Contains(s)) ||
+                    (x.Brand != null && x.Brand.ToLower().Contains(s)) ||
+                    (x.AssetType != null && x.AssetType.ToLower().Contains(s))
                 );
             }
 
             var totalCount = await query.CountAsync();
 
-
             var items = await query
                 .OrderBy(x => x.Id)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .Select(t => new AssetsMaster
+                .Select(t => new AssetPagedDto
                 {
+                    Id = t.Id,
                     AssetTag = t.AssetTag,
                     AssetType = t.AssetType,
-                    Id = t.Id,
                     Brand = t.Brand,
                     Model = t.Model,
-                    StatusId = t.StatusId,
-                    Storage_GB = t.Storage_GB,
-                    RAM_GB = t.RAM_GB,
                     SerialNumber = t.SerialNumber,
-                    PurchaseCost = t.PurchaseCost,
-                    WarrantyDate = t.WarrantyDate,
-                    PurchaseDate = t.PurchaseDate,
-                    DepartmentId = t.DepartmentId,
+                    StatusId = t.StatusId,
+                    StatusName = t.Status != null ? t.Status.StatusName : "—",
+                    AssignedTo = _context.AssetAssignments
+    .Where(a => a.AssetId == t.Id && a.ReturnedOn == null)
+    .Join(_context.Users,
+        a => a.UserId,
+        u => u.Id,
+        (a, u) => u.Name)
+    .FirstOrDefault()
                 })
                 .ToListAsync();
 
-
-            return new PagedResultAssets<AssetsMaster>
+            return new PagedResultAssets<AssetPagedDto>
             {
                 Data = items,
                 TotalCount = totalCount,
@@ -95,7 +97,6 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.RepositoriesANI.RepImplementati
                 PageSize = pageSize
             };
         }
-
         public async Task<AssetsMaster> AddAsync(AssetsMaster model)
         {
             var entry = (await _context.AssetMaster.AddAsync(model)).Entity;

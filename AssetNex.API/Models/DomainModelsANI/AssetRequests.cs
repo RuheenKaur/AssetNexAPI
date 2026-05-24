@@ -1,8 +1,14 @@
-﻿namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DomainModelsANI
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DomainModelsANI
 {
     public class AssetRequests
     {
-       public int Id { get; set; }        
+
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }        
         public int AssetId  { get; set; }
         public AssetsMaster Asset { get; set; }
        public int  UserId { get; set; }

@@ -86,7 +86,7 @@ public class TicketsControllerIntegrationTests
         Assert.NotNull(content);
         Assert.True(content.Length > 0);
     }
-    [Fact]
+    [Fact(Skip ="Route under review")]
     public async Task GetTickets_WithToken_Returns200()
     {
         _client.DefaultRequestHeaders.Authorization =

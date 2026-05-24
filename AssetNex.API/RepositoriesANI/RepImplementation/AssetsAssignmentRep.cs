@@ -133,29 +133,4 @@ public class AssetsAssignmentRep : IAssetsAssignmentRep
     }
 
 
-
-
-    //public async Task<List<AssignedAssetDto>> GetAssignedAssetsByUserId(int userId)
-    //{
-    //    return await _context.AssetAssignments
-    //        .Where(a =>
-    //            a.AssignedToUserId == userId &&   
-    //            a.ReturnedOn == null              
-    //        )
-    //        .Join(
-    //            _context.AssetMaster,
-    //            aa => aa.AssetId,
-    //            am => am.Id,
-    //            (aa, am) => new AssignedAssetDto
-    //            {
-    //                AssetId = am.Id,
-    //                AssetName = am.AssetName,
-    //                AssetTag = am.AssetTag,
-    //                AssignedOn = aa.AssignedOn,
-    //                WarrantyDate = am.WarrantyDate
-    //            }
-    //        )
-    //        .ToListAsync();
-    //}
-
 }

@@ -4,20 +4,18 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.RepositoriesANI.RepInterface
 {
     public interface IUsersRep
     {
-        IEnumerable<Users> GetAll();
-        Users GetById(int id);
-        Task<IEnumerable<Users>> GetByUserEmailAsync(string email);
-     
-        void Create(Users user);
-        void Update(int id, Users user);
-        void Delete(int id);
-        Task<Users?> GetUserByIdAsync(int id);
-        Task<UserProfileDto?> GetUserProfileAsync(int id);
+        Task<IEnumerable<Users>> GetAllAsync();
+
+        Task<Users?> GetByIdAsync(int id);
+
         Task<Users?> GetByEmailAsync(string email);
-        Task<Users> UpdateAsync(Users user);
+
+        Task CreateAsync(Users user);
+
+        Task UpdateAsync(Users user);
+
+        Task DeleteAsync(int id);
+
         Task<bool> DeactivateUserAsync(int userId);
-        
     }
 }
-
- 

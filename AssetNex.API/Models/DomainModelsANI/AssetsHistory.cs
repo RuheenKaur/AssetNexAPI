@@ -8,6 +8,8 @@
         public int UserId { get; set; }
         public Users User { get; set; }
         public int StatusId { get; set; }
+       
+        public string ModifiedBy { get; set; }
         public StatusMaster Status { get; set; }  
         public string EventType { get; set; }
         public DateTime EventDate { get; set; }

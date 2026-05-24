@@ -6,6 +6,8 @@
         public int UserId { get; set; }
         public string RequestedAssetType { get; set; }
         public string Reason { get; set; }
+
+       
     }
 }
 

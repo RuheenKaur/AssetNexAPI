@@ -14,13 +14,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
-using System.Net.WebSockets;
 using System.Text;
 using static AssetNex.API.Controllers.AuthController;
 
+
 var builder = WebApplication.CreateBuilder(args);
-
-
 
 var keyVaultUrl = builder.Configuration["KeyVaultUrl"];
 if (!string.IsNullOrEmpty(keyVaultUrl))
@@ -29,16 +27,22 @@ if (!string.IsNullOrEmpty(keyVaultUrl))
         new Uri(keyVaultUrl),
         new DefaultAzureCredential(),
         new AzureKeyVaultConfigurationOptions());
-}
+};
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler =
+            System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddMemoryCache();
 builder.Services.AddSignalR();
 builder.Logging.ClearProviders();
-builder.Logging.AddConsole();
+builder.Logging.AddConsole();   
 builder.Services.Configure<JwtSettings>(
-    builder.Configuration.GetSection("JwtSettings"));
+builder.Configuration.GetSection("JwtSettings"));
+
 
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -50,7 +54,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("AuthDbConnection")));
 
-
 builder.Services.AddScoped<IAssetsAssignmentRep, AssetsAssignmentRep>();
 builder.Services.AddScoped<IAssetsRequestsRep, AssetsRequestsRep>();
 builder.Services.AddScoped<IAssetsHistoryRep, AssetHistoryRep>();
@@ -60,18 +63,15 @@ builder.Services.AddScoped<IAssetSoftwareRep, AssetSoftwareRep>();
 builder.Services.AddScoped<ISupportTicketService, SupportTicketService>();
 builder.Services.AddScoped<ISupportTicketsRep, SupportTicketsRep>();
 
-builder.Services
-    .AddIdentity<IdentityUser, IdentityRole>(options =>
-    {
-        options.Password.RequireDigit = false;
-        options.Password.RequireLowercase = false;
-        options.Password.RequireUppercase = false;
-        options.Password.RequireNonAlphanumeric = false;
-        options.Password.RequiredUniqueChars = 0;
-    })
-    .AddEntityFrameworkStores<AuthDbContext>()
-    .AddDefaultTokenProviders();
 
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+{
+    options.Password.RequireDigit = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequiredUniqueChars = 0;
+}).AddEntityFrameworkStores<AuthDbContext>().AddDefaultTokenProviders();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -80,13 +80,14 @@ builder.Services.ConfigureApplicationCookie(options =>
         context.Response.StatusCode = StatusCodes.Status401Unauthorized;
         return Task.CompletedTask;
     };
+
     options.Events.OnRedirectToAccessDenied = context =>
     {
         context.Response.StatusCode = StatusCodes.Status403Forbidden;
         return Task.CompletedTask;
     };
-});
 
+});
 
 builder.Services.AddAuthentication(options =>
 {
@@ -105,7 +106,8 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
         ValidAudience = builder.Configuration["JwtSettings:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"]!))
+            Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"]!)),
+        RoleClaimType = "role"
     };
 
     
@@ -124,10 +126,6 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-//var keyVaultUrl = builder.Configuration["KeyVaultUrl"];
-//builder.Configuration.AddAzureKeyVault(
-//    new Uri(keyVaultUrl),
-//    new Azure.Identity.DefaultAzureCredential());
 
 builder.Services.AddAuthorization();
 
@@ -179,7 +177,6 @@ builder.Services.AddCors(options =>
             .AllowCredentials());
 });
 
-
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -193,22 +190,19 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Migration failed: {ex.Message}");
-        // App continues even if migration fails
+        Console.WriteLine($"Migration failed : {ex.Message}");
     }
-}
+}  
 
 
-Console.WriteLine("JWT KEY -> " + builder.Configuration["JwtSettings:Key"]);
-
-app.UseRouting();
-app.UseSwagger();
-app.UseSwaggerUI();
-app.UseStaticFiles();
-app.UseCors("AllowAngular");
 app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
+app.UseCors("AllowAngular");
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseSwagger();
+app.UseSwaggerUI();
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseMiddleware<RequestLoggingMiddleware>();
 app.MapControllers();
@@ -216,6 +210,49 @@ app.MapGet("/test", () => "Working");
 app.MapHub<AlertHub>("/hubs/alerts");
 app.MapGet("/", () => "RUNNING ✅");
 app.Logger.LogInformation("AssetNexIT API Started");
+
+app.MapGet("/api/minimal/assets", async (IAssetsAssignmentRep repo) =>
+{
+    var assets = await repo.GetAll();
+    return Results.Ok(assets);
+});
+
+
+
 app.Run();
 
+//app.Use(async (context, next) =>
+//{
+
+//    if (context.User.Identity?.IsAuthenticated == true)
+//    {
+//        var claims = context.User.Claims.Select(c => $"{c.Type} : {c.Value}");
+//        Console.WriteLine("JWT Claims:" + string.Join(",", claims));
+//    }
+//    await next();
+//});
 public partial class Program { }
+  
+
+//public class GlobalExceptionHandler : IExceptionHandler
+//{
+//    public async ValueTask<bool> TryHandleAsync(HttpContext context, 
+//        Exception exception, CancellationToken cancellationToken)
+//    {
+//        var problemDetails = new ProblemDetails();
+//        {
+//            Status = StatusCodes.Status500InternalServerError,
+//            Title = "An unexpected error occurred",
+//            Detail = exception.Message
+//        };
+
+//        context.Response.StatusCode = 500;
+//        await context.Response.WriteAsJsonAsync(problemDetails);
+//        return true;
+//    }
+//}
+
+
+
+
+

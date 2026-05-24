@@ -40,18 +40,15 @@ namespace AssetNex.API.RepositoriesANI.RepImplementation
                         Name = r.User.Name,
                         Email = r.User.Email,
                         Contact = r.User.Contact,
-                        Asset = r.Asset.AssetTag,
+                        Asset = r.Asset != null ? r.Asset.AssetTag : "—",
                         RequestedAssetType = r.RequestedAssetType,
                         Reason = r.Reason,
                         Status = r.Status.StatusName,
-                        RequestedOn = r.RequestedOn
+                        RequestedOn = r.RequestedOn,
+                     StatusId   = r.StatusId
                     })
                     .ToListAsync();
             }
-        
-
-      
-
         public async Task<AssetRequests> Update(AssetRequests model)
         {
             _context.AssetRequests.Update(model);
@@ -64,7 +61,7 @@ namespace AssetNex.API.RepositoriesANI.RepImplementation
         {
             var record = await _context.AssetRequests.FirstOrDefaultAsync(a => a.Id ==id);
 
-            if(record !=null) return false;
+            if (record == null) return false;
             _context.AssetRequests.Remove(record);
             await _context.SaveChangesAsync();
             return true;

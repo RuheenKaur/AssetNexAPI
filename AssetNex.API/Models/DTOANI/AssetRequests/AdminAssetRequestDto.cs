@@ -11,6 +11,8 @@
         public string RequestedAssetType { get; set; }
         public string Reason { get; set; }
         public string Status { get; set; }
+
+        public int StatusId { get; set; }
         public DateTime RequestedOn { get; set; }
     }
 

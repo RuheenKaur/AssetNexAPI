@@ -3,9 +3,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
+
+
 namespace AssetNex.API.Data
 {
-    public class AuthDbContext : IdentityDbContext<IdentityUser>
+    public class AuthDbContext : IdentityDbContext<ApplicationUser>
     {
         public AuthDbContext(DbContextOptions<AuthDbContext> options) : base(options) { }
 
@@ -13,7 +15,7 @@ namespace AssetNex.API.Data
         {
             base.OnModelCreating(builder);
 
-            var hasher = new PasswordHasher<IdentityUser>();
+            var hasher = new PasswordHasher<ApplicationUser>();
 
 
             var readerRoleId = "463fb724-bf6a-459d-95d2-6e338fe4baf7";
@@ -25,8 +27,8 @@ namespace AssetNex.API.Data
 
       
 
-            builder.Entity<IdentityUser>().HasData(
-            new IdentityUser
+            builder.Entity<ApplicationUser>().HasData(
+            new ApplicationUser
             {
                 Id = adminUserId,
                 UserName = "admin@assetnex.com",
@@ -40,8 +42,8 @@ namespace AssetNex.API.Data
             }
         );
 
-            builder.Entity<IdentityUser>().HasData(
-                new IdentityUser
+            builder.Entity<ApplicationUser>().HasData(
+                new ApplicationUser
                 {
                     Id = userId,
                     UserName = "user",

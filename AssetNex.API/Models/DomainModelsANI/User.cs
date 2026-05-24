@@ -11,7 +11,7 @@
         public string Contact { get; set; }
         public int DepartmentId { get; set; }
         public int RoleId { get; set; }
-        public DateTime CreatedOn { get; set; }
+        public DateTime createdOn { get; set; }
     }
 }
     

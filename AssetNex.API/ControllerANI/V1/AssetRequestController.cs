@@ -7,10 +7,8 @@ using AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DTOANI.SupportTicket;
 using AssetNexAPI.AssetNexITAPI.AssetNex.API.RepositoriesANI.RepInterface;
 using Azure;
 using Azure.Core;
-using Microsoft.AspNetCore.Mvc;
-using Asp.Versioning;
-
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.SqlServer.Server;
@@ -50,7 +48,7 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI.V1
         }
 
         [HttpPatch("{id}/status")]
-        [Authorize(Roles = "Admin")]
+       
         public async Task<IActionResult> UpdateStatus(int id, UpdateStatusDto dto)
         {
             var request = await _appDbContext.AssetRequests.FindAsync(id);
@@ -65,25 +63,30 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI.V1
 
 
         [HttpPost("create")]
-            [Authorize]
+           
             public async Task<IActionResult> Create([FromBody] CreateAssetRequestDto dto)
             {
-                var userId = int.Parse(User.FindFirst("userId")!.Value);
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
 
-                var user = await _appDbContext.Users.FindAsync(userId);
+            if (userIdClaim == null)
+            {
+                return Unauthorized("User ID claim missing");
+            }
+
+            var userId = int.Parse(userIdClaim.Value);
+
+            var user = await _appDbContext.Users.FindAsync(userId);
                 if (user == null)
                     return Unauthorized();
 
                 var request = new AssetRequests
                 {
+                    
                     AssetId = dto.AssetId,
                     RequestedAssetType = dto.RequestedAssetType,
                     Reason = dto.Reason,
                     UserId = userId,
-
-                
-                    StatusId = 8,
-
+                    StatusId = 11,  // Pending
                     RequestedOn = DateTime.UtcNow
                 };
 
@@ -92,11 +95,12 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI.V1
             }
 
           
-           
+
+
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var result = await _repo.GetAll();
+            var result = await _repo.GetAllAsync();  // ← this one
             return Ok(result);
         }
 
@@ -109,21 +113,28 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI.V1
                 return NotFound($"Asset Request ID {id} not found");
             return Ok(result);
         }
-
-        [HttpPost]
-        public async Task<IActionResult> Create(AssetRequestDto dto)
+        [HttpGet("user/{userId}")]
+       
+        public async Task<IActionResult> GetByUser(int userId)
         {
-            var request = new AssetRequests
-            {
-                UserId = dto.UserId,
-                RequestedAssetType = dto.RequestedAssetType,
-                Reason = dto.Reason,
-                StatusId = 1,
-                RequestedOn = DateTime.Now
-            };
+            var requests = await _appDbContext.AssetRequests
+                .Include(r => r.Status)
+                .Include(r => r.Asset)
+                .Where(r => r.UserId == userId)
+                .OrderByDescending(r => r.RequestedOn)
+                .Select(r => new
+                {
+                    r.Id,
+                    r.RequestedAssetType,
+                    r.Reason,
+                    Status = r.Status.StatusName,
+                    r.StatusId,
+                    Asset = r.Asset != null ? r.Asset.AssetTag : "—",
+                    r.RequestedOn
+                })
+                .ToListAsync();
 
-            await _repo.Add(request);
-            return Ok(request);
+            return Ok(requests);
         }
 
         [HttpPut("{id:int}")]
@@ -151,37 +162,4 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI.V1
      
 }
 
-
-/// api / v1 / asset - requests
-/// api / v2 / asset - requests
-
-
-
-
-//using Microsoft.AspNetCore.Mvc;
-
-//namespace AssetNexIT.API.Controllers.V2;
-
-//[ApiController]
-//[ApiVersion("2.0")]
-//[Route("api/v{version:apiVersion}/asset-requests")]
-//public class AssetRequestsController : ControllerBase
-//{
-    
-//GET https://localhost:5001/api/v1/asset-requests
-//V2
-//bash
-//Copy code
-//GET https://localhost:5001/api/v2/asset-requests
-
-
-
-
-//Then just log both in console during demo.
-
-// How to explain to ma’am(say THIS)
-//“I’ve implemented URL-based API versioning.
-//v1 returns the original response.
-//v2 improves the response format without breaking existing clients.
-//This allows backward compatibility and safe evolution.”
 

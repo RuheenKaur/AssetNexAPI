@@ -6,12 +6,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Client;
-using System.Runtime.InteropServices;
+
 
 namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI
 {
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+   
      [Route("api/[controller]")]
          [ApiController]
     public class AssetsMasterController : ControllerBase
@@ -40,20 +39,37 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI
             if (asset == null) return NotFound();
             return Ok(asset);
         }
+        
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] AssetsMaster asset)
+        public async Task<IActionResult> Create([FromBody] CreateAssetDto dto)
         {
-            if (asset == null) return BadRequest("Asset is null.");
+            if (dto == null) return BadRequest("Asset data is null.");
+
+            var asset = new AssetsMaster
+            {
+                AssetTag = dto.AssetTag,
+                AssetType = dto.AssetType,
+                Brand = dto.Brand,
+                Model = dto.Model ?? string.Empty,
+                SerialNumber = dto.SerialNumber ?? string.Empty,
+                RAM_GB = dto.RAM_GB ?? string.Empty,
+                Storage_GB = dto.Storage_GB ?? string.Empty,
+                StatusId = dto.StatusId > 0 ? dto.StatusId : 1,
+                PurchaseCost = dto.PurchaseCost,
+                WarrantyDate = dto.WarrantyDate,
+                PurchaseDate = dto.PurchaseDate ?? DateTime.UtcNow,
+                CreatedOn = DateTime.UtcNow,
+                DepartmentId = dto.DepartmentId > 0 ? dto.DepartmentId : 1
+            };
 
             try
             {
                 var created = await _repo.AddAsync(asset);
-                return CreatedAtRoute("GetAssetById", new { id = created.Id }, created);
+                return Ok(new { message = "Asset created successfully", id = created.Id });
             }
             catch (Exception ex)
             {
-
                 return StatusCode(500, $"Error saving asset: {ex.Message}");
             }
         }
@@ -67,32 +83,17 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI
         }
 
         [HttpPut("{id:int}")]
-
         public async Task<IActionResult> Update(int id, [FromBody] AssetsMaster asset)
-
         {
-            if (asset == null)
-                return BadRequest("Asset is null");
-            if (id != asset.Id)
-            {
-                asset.Id = id;
-            }
-
+            if (asset == null) return BadRequest("Asset is null");
+            asset.Id = id;
             try
             {
                 var updated = await _repo.UpdateAsync(asset);
                 return Ok(updated);
             }
-
-            catch (KeyNotFoundException)
-            {
-                return NotFound();
-            }
-
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Error updating asset: {ex.Message}");
-            }
+            catch (KeyNotFoundException) { return NotFound(); }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
 
         [HttpGet("paged")]
@@ -150,6 +151,19 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI
             });
 
                 }
+
+        [HttpPatch("{id:int}/status")]
+        public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateAssetStatusDto dto)
+        {
+            var asset = await _context.AssetMaster.FindAsync(id);
+            if (asset == null) return NotFound();
+            asset.StatusId = dto.StatusId;
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
+
+
     }
 
 }
