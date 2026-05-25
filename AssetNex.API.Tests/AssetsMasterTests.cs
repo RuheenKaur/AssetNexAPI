@@ -143,7 +143,7 @@ namespace AssetNex.API.Tests.Services
             result.Model.Should().Be("MacBook Pro");
         }
 
-        // ── DeleteAsync ─────────────────────────────────────────────
+       
 
         [Fact]
         public async Task DeleteAsync_WhenAssetExists_ReturnsTrue()
@@ -165,7 +165,7 @@ namespace AssetNex.API.Tests.Services
             result.Should().BeFalse();
         }
 
-        // ── GetAssetsPagedAsync ─────────────────────────────────────
+    
 
         [Fact]
         public async Task GetAssetsPagedAsync_ReturnsPaginatedResult()
