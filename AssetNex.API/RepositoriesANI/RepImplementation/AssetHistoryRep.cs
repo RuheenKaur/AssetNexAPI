@@ -32,7 +32,8 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.RepositoriesANI.RepImplementati
                     EventType = h.EventType,
                     Remarks = h.Remarks ?? "—",
                     PerformedAt = h.PerformedAt,
-                    ModifiedBy = h.User != null ? h.User.Name : "System"
+                    ModifiedBy = !string.IsNullOrEmpty(h.ModifiedBy) ? h.ModifiedBy : "System"
+               
                 })
                 .ToListAsync();
         }

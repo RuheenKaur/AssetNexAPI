@@ -14,7 +14,6 @@ public class SupportTickets
     [ForeignKey(nameof(Asset))]
     public int AssetId { get; set; }
     public AssetsMaster Asset { get; set; }
-
     public string IssueCategory { get; set; }
     public string IssueDescription { get; set; }
     public string Priority { get; set; }
@@ -22,7 +21,6 @@ public class SupportTickets
     [ForeignKey(nameof(Status))]
     public int StatusId { get; set; }
     public StatusMaster Status { get; set; }
-
     public DateTime CreatedAt { get; set; }
     public string ResolutionNotes { get; set; }
 }

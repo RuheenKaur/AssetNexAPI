@@ -110,7 +110,7 @@ namespace AssetNex.API.Migrations.AppDb
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    .Annotation("SqlServer:Identity", "1, 1"),
                     AssetId = table.Column<int>(type: "int", nullable: false),
                     UserId = table.Column<int>(type: "int", nullable: false),
                     ReturnedOn = table.Column<DateTime>(type: "datetime2", nullable: true),

@@ -4,13 +4,12 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using AssetNex.API.Data;
-using AssetNex.API.Models.DomainModel;
-using AssetNex.API.Models.DTO.Register;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
+using AssetNex.API.Models.DTOANI.Register;
 
 
 namespace AssetNex.API.Controllers
@@ -23,11 +22,8 @@ namespace AssetNex.API.Controllers
         private readonly IConfiguration _configuration;
         private readonly JwtSettings _jwtSettings;
         private readonly ILogger<AuthController> _logger;
-         private readonly AppDbContext _appDb;
-
-       
-
-             public AuthController(
+        private readonly AppDbContext _appDb;
+     public AuthController(
      UserManager<ApplicationUser> userManager,
      IConfiguration configuration,
      IOptions<JwtSettings> jwtOptions,
@@ -48,8 +44,10 @@ namespace AssetNex.API.Controllers
         public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
         {
             var user = await _userManager.FindByEmailAsync(request.Email);
+
             if (user == null || !await _userManager.CheckPasswordAsync(user, request.Password))
                 return Unauthorized("Invalid email or password");
+
             var customUser = await _appDb.Users
                 .FirstOrDefaultAsync(u => u.Email == request.Email);
 
@@ -58,9 +56,9 @@ namespace AssetNex.API.Controllers
 
             var authClaims = new List<Claim>
     {
-        new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
-        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-        new Claim(ClaimTypes.NameIdentifier, customUser.Id.ToString()),
+            new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim(ClaimTypes.NameIdentifier, customUser.Id.ToString()),
     };
 
             var userRoles = await _userManager.GetRolesAsync(user);
@@ -71,7 +69,7 @@ namespace AssetNex.API.Controllers
             }
 
             var authSigningKey = new SymmetricSecurityKey(
-    Encoding.UTF8.GetBytes(_jwtSettings.Key));
+            Encoding.UTF8.GetBytes(_jwtSettings.Key));
 
             var token = new JwtSecurityToken(
                 issuer: _jwtSettings.Issuer,
@@ -96,12 +94,10 @@ namespace AssetNex.API.Controllers
 
             var primaryRole = userRoles.FirstOrDefault();
 
-
-
             return Ok(new
             {
                 accessToken = new JwtSecurityTokenHandler().WriteToken(token),
-                //refreshToken = refreshToken.Token,
+               
                 expiration = token.ValidTo,
                 email = user.Email,
                 role = primaryRole,
@@ -248,7 +244,7 @@ namespace AssetNex.API.Controllers
             public string Key { get; set; } = string.Empty;
             public string Issuer { get; set; } = string.Empty;
             public string Audience { get; set; } = string.Empty;
-            public int ExpiryHours { get; set; }
+            public int ExpiryHours { get; set; } = 8;
         }
 
 

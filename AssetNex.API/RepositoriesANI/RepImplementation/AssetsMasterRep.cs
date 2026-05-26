@@ -49,9 +49,10 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.RepositoriesANI.RepImplementati
       
         public async Task<PagedResultAssets<AssetPagedDto>> GetAssetsPagedAsync(int page, int pageSize, string search)
         {
+      
             var query = _context.AssetMaster
-                .AsNoTracking()
-                .AsQueryable();
+           .OrderByDescending(a => a.Id).AsNoTracking()
+           .AsQueryable();
 
             if (!string.IsNullOrEmpty(search))
             {
@@ -66,7 +67,6 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.RepositoriesANI.RepImplementati
             var totalCount = await query.CountAsync();
 
             var items = await query
-                .OrderBy(x => x.Id)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .Select(t => new AssetPagedDto
@@ -80,12 +80,12 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.RepositoriesANI.RepImplementati
                     StatusId = t.StatusId,
                     StatusName = t.Status != null ? t.Status.StatusName : "—",
                     AssignedTo = _context.AssetAssignments
-    .Where(a => a.AssetId == t.Id && a.ReturnedOn == null)
-    .Join(_context.Users,
-        a => a.UserId,
-        u => u.Id,
-        (a, u) => u.Name)
-    .FirstOrDefault()
+                   .Where(a => a.AssetId == t.Id && a.ReturnedOn == null)
+                   .Join(_context.Users,
+                    a => a.UserId,
+                    u => u.Id,
+                    (a, u) => u.Name)
+                    .FirstOrDefault()
                 })
                 .ToListAsync();
 
@@ -99,6 +99,7 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.RepositoriesANI.RepImplementati
         }
         public async Task<AssetsMaster> AddAsync(AssetsMaster model)
         {
+            
             var entry = (await _context.AssetMaster.AddAsync(model)).Entity;
             await _context.SaveChangesAsync();
             return entry;

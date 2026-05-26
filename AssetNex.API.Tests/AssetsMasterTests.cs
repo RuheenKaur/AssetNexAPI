@@ -16,7 +16,6 @@ namespace AssetNex.API.Tests.Services
             _mockRepo = new Mock<IAssetsMasterRep>();
         }
 
-        
         private AssetsMaster MakeAsset(int id = 1, string tag = "AST-001") => new AssetsMaster
         {
             Id = id,
@@ -24,8 +23,6 @@ namespace AssetNex.API.Tests.Services
             AssetType = "Laptop",
             Brand = "Dell"
         };
-
-     
 
         [Fact]
         public async Task GetAllAsync_ReturnsAllAssets()
@@ -53,7 +50,6 @@ namespace AssetNex.API.Tests.Services
             result.Should().BeEmpty();
         }
 
-       
         [Fact]
         public async Task GetAsync_WhenAssetExists_ReturnsAsset()
         {
@@ -76,7 +72,6 @@ namespace AssetNex.API.Tests.Services
             result.Should().BeNull();
         }
 
-      
         [Fact]
         public async Task AddAsync_ReturnsCreatedAsset()
         {
@@ -103,7 +98,6 @@ namespace AssetNex.API.Tests.Services
             result.Id.Should().BeGreaterThan(0);
         }
 
- 
         [Fact]
         public async Task UpdateAsync_WhenAssetExists_ReturnsUpdatedAsset()
         {
@@ -143,8 +137,6 @@ namespace AssetNex.API.Tests.Services
             result.Model.Should().Be("MacBook Pro");
         }
 
-       
-
         [Fact]
         public async Task DeleteAsync_WhenAssetExists_ReturnsTrue()
         {
@@ -165,17 +157,15 @@ namespace AssetNex.API.Tests.Services
             result.Should().BeFalse();
         }
 
-    
-
         [Fact]
         public async Task GetAssetsPagedAsync_ReturnsPaginatedResult()
         {
-            var pagedResult = new PagedResultAssets<AssetsMaster>
+            var pagedResult = new PagedResultAssets<AssetPagedDto>
             {
-                Data = new List<AssetsMaster>
+                Data = new List<AssetPagedDto>
                 {
-                    MakeAsset(1, "AST-001"),
-                    MakeAsset(2, "AST-002")
+                    new AssetPagedDto { Id = 1, AssetTag = "AST-001", AssetType = "Laptop", Brand = "Dell" },
+                    new AssetPagedDto { Id = 2, AssetTag = "AST-002", AssetType = "Laptop", Brand = "HP" }
                 },
                 TotalCount = 10,
                 Page = 1,
@@ -194,11 +184,11 @@ namespace AssetNex.API.Tests.Services
         [Fact]
         public async Task GetAssetsPagedAsync_WithSearch_ReturnsFilteredResult()
         {
-            var pagedResult = new PagedResultAssets<AssetsMaster>
+            var pagedResult = new PagedResultAssets<AssetPagedDto>
             {
-                Data = new List<AssetsMaster>
+                Data = new List<AssetPagedDto>
                 {
-                    new AssetsMaster { Id = 1, AssetTag = "AST-001", AssetType = "Laptop", Brand = "Dell" }
+                    new AssetPagedDto { Id = 1, AssetTag = "AST-001", AssetType = "Laptop", Brand = "Dell" }
                 },
                 TotalCount = 1,
                 Page = 1,
@@ -215,9 +205,9 @@ namespace AssetNex.API.Tests.Services
         [Fact]
         public async Task GetAssetsPagedAsync_WhenNoResults_ReturnsEmptyData()
         {
-            var pagedResult = new PagedResultAssets<AssetsMaster>
+            var pagedResult = new PagedResultAssets<AssetPagedDto>
             {
-                Data = new List<AssetsMaster>(),
+                Data = new List<AssetPagedDto>(),
                 TotalCount = 0,
                 Page = 1,
                 PageSize = 10
@@ -229,8 +219,6 @@ namespace AssetNex.API.Tests.Services
             result.Data.Should().BeEmpty();
             result.TotalCount.Should().Be(0);
         }
-
-     
 
         [Fact]
         public async Task GetAsyncStatus_WhenExists_ReturnsAsset()

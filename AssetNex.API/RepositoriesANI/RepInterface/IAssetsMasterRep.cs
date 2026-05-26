@@ -15,8 +15,6 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.RepositoriesANI.RepInterface
         Task<AssetsMaster> UpdateDetails(AssetsMaster model);
         Task<AssetsMaster> UpdateAsync(AssetsMaster model);
         Task<bool> DeleteAsync(int id);
-
-
         Task<PagedResultAssets<AssetPagedDto>> GetAssetsPagedAsync(int page, int pageSize, string search);
     }
 }

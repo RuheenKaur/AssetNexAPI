@@ -1,28 +1,29 @@
-﻿using AssetNex.API.Models.DomainModel;
+﻿using AssetNex.API.Models.DTOANI.Assets;
 using AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DomainModelsANI;
 using AssetNexAPI.AssetNexITAPI.AssetNex.API.RepositoriesANI.RepInterface;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI
 {
-   
-     [Route("api/[controller]")]
-         [ApiController]
+    [Route("api/[controller]")]
+    [ApiController]
     public class AssetsMasterController : ControllerBase
     {
         private readonly IAssetsMasterRep _repo;
         private readonly AppDbContext _context;
+        private readonly IAssetsHistoryRep _historyRepo;
 
-        public AssetsMasterController(IAssetsMasterRep repo, AppDbContext context)
+        public AssetsMasterController(IAssetsMasterRep repo, AppDbContext context, IAssetsHistoryRep historyRepo)
         {
             _repo = repo;
             _context = context;
+            _historyRepo = historyRepo;
+
         }
+
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
@@ -39,7 +40,7 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI
             if (asset == null) return NotFound();
             return Ok(asset);
         }
-        
+
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateAssetDto dto)
@@ -82,18 +83,48 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI
             return Ok(asset);
         }
 
-        [HttpPut("{id:int}")]
-        public async Task<IActionResult> Update(int id, [FromBody] AssetsMaster asset)
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateAssetDto dto)
         {
-            if (asset == null) return BadRequest("Asset is null");
-            asset.Id = id;
+
+            var asset = await _context.AssetMaster.FindAsync(id);
+            if (asset == null) return NotFound();
+
+            asset.AssetTag = dto.AssetTag;
+            asset.AssetType = dto.AssetType;
+            asset.Brand = dto.Brand;
+            asset.Model = dto.Model;
+            asset.SerialNumber = dto.SerialNumber;
+            asset.StatusId = dto.StatusId;
+
+            await _context.SaveChangesAsync();
+
+
             try
             {
-                var updated = await _repo.UpdateAsync(asset);
-                return Ok(updated);
+                var adminName = User?.FindFirst(System.Security.Claims.ClaimTypes.Email)
+                    ?.Value ?? "Admin";
+
+                await _historyRepo.CreateAsync(new AssetsHistory
+                {
+                    AssetId = id,
+                    UserId = 0,
+                    EventType = "Updated",
+                    Remarks = $"Asset details updated. Status set to {dto.StatusId}",
+                    PerformedAt = DateTime.UtcNow,
+                    StatusId = dto.StatusId,
+                    ModifiedBy = adminName
+                });
             }
-            catch (KeyNotFoundException) { return NotFound(); }
-            catch (Exception ex) { return StatusCode(500, ex.Message); }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"History log failed (update): {ex.Message}");
+            }
+
+            return Ok(new { message = "Asset updated" });
         }
 
         [HttpGet("paged")]
@@ -130,8 +161,6 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI
             return NoContent();
         }
 
-
-
         [HttpGet("debug-data")]
         public async Task<IActionResult> DebugData()
         {
@@ -150,7 +179,7 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI
                 })
             });
 
-                }
+        }
 
         [HttpPatch("{id:int}/status")]
         public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateAssetStatusDto dto)
@@ -168,7 +197,7 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI
 
 }
 
-        
+
 
 
 

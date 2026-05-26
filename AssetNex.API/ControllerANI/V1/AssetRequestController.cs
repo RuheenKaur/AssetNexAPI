@@ -1,5 +1,6 @@
 ﻿using AssetNex.API.Models.DomainModel;
 using AssetNex.API.Models.DTO.Asset;
+using AssetNex.API.Models.DTOANI.AssetRequests;
 using AssetNex.API.RepositoriesANI.RepInterface;
 using AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DomainModelsANI;
 using AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DTOANI.AssetRequests;
@@ -61,11 +62,9 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI.V1
             return Ok();
         }
 
-
         [HttpPost("create")]
-           
-            public async Task<IActionResult> Create([FromBody] CreateAssetRequestDto dto)
-            {
+        public async Task<IActionResult> Create([FromBody] CreateAssetRequestDto dto)
+        {
             var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
 
             if (userIdClaim == null)
@@ -76,31 +75,29 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI.V1
             var userId = int.Parse(userIdClaim.Value);
 
             var user = await _appDbContext.Users.FindAsync(userId);
-                if (user == null)
-                    return Unauthorized();
+            if (user == null)
+                return Unauthorized();
 
-                var request = new AssetRequests
-                {
-                    
-                    AssetId = dto.AssetId,
-                    RequestedAssetType = dto.RequestedAssetType,
-                    Reason = dto.Reason,
-                    UserId = userId,
-                    StatusId = 11,  // Pending
-                    RequestedOn = DateTime.UtcNow
-                };
+            var request = new AssetRequests
+            {
 
-                await _repo.CreateAsync(request);
-                return Ok(new { message = "Asset request submitted successfully" });
-            }
+                AssetId = dto.AssetId,
+                RequestedAssetType = dto.RequestedAssetType,
+                Reason = dto.Reason,
+                UserId = userId,
+                StatusId = 11, 
+                RequestedOn = DateTime.UtcNow
+            };
 
-          
+            await _repo.CreateAsync(request);
+            return Ok(new { message = "Asset request submitted successfully" });
+        }
 
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var result = await _repo.GetAllAsync();  // ← this one
+            var result = await _repo.GetAllAsync(); 
             return Ok(result);
         }
 
@@ -113,29 +110,30 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI.V1
                 return NotFound($"Asset Request ID {id} not found");
             return Ok(result);
         }
-        [HttpGet("user/{userId}")]
+
        
-        public async Task<IActionResult> GetByUser(int userId)
+        [HttpGet("user/{userId}")]
+        public async Task<IActionResult> GetMyRequests(int userId)
         {
             var requests = await _appDbContext.AssetRequests
-                .Include(r => r.Status)
-                .Include(r => r.Asset)
-                .Where(r => r.UserId == userId)
+                .Where(r => r.RequestedBy == userId || r.UserId == userId)
                 .OrderByDescending(r => r.RequestedOn)
                 .Select(r => new
                 {
                     r.Id,
                     r.RequestedAssetType,
                     r.Reason,
-                    Status = r.Status.StatusName,
+                    r.RequestedOn,
                     r.StatusId,
-                    Asset = r.Asset != null ? r.Asset.AssetTag : "—",
-                    r.RequestedOn
+                    r.AdminNotes,                        
+                    AssetName = r.Asset != null        
+                        ? r.Asset.AssetTag
+                        : null
                 })
                 .ToListAsync();
-
             return Ok(requests);
         }
+
 
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Put(int id, [FromBody] AssetRequests model)
@@ -158,8 +156,39 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI.V1
             return Ok($"Request ID {id} removed successfully.");
         }
 
+
+        [HttpPatch("{id}/review")]
+        public async Task<IActionResult> ReviewRequest(
+            int id,
+            [FromBody] ReviewRequestDto dto)
+        {
+            var request = await _appDbContext.AssetRequests.FindAsync(id);
+            if (request == null)
+                return NotFound($"Request {id} not found");
+
+            request.StatusId = dto.StatusId;
+
+            if (!string.IsNullOrEmpty(dto.AdminNotes))
+                request.AdminNotes = dto.AdminNotes;
+
+            await _appDbContext.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "Request updated",
+                id = request.Id,
+                statusId = request.StatusId,
+                adminNotes = request.AdminNotes
+            });
+        }
+
+
     }
-     
+
+
+
 }
+
+
 
 

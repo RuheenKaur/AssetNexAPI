@@ -1,7 +1,5 @@
-﻿using AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DomainModelsANI;
-using AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DTOANI.SupportTicket;
+﻿using AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DTOANI.SupportTicket;
 using AssetNexAPI.AssetNexITAPI.AssetNex.API.RepositoriesANI.RepInterface;
-using Microsoft.EntityFrameworkCore;
 
 
 namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.Services
@@ -24,9 +22,9 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.Services
         public async Task<PagedResult<SupportTicketAdminDto>> GetTicketsAsync(
         int pageNumber,
         int pageSize,
-           string? search,
-    string? sortField,
-    string? sortOrder)
+        string? search,
+        string? sortField,
+        string? sortOrder)
         {
             return await _repo.GetAdminTicketsPagedAsync(
                 pageNumber,

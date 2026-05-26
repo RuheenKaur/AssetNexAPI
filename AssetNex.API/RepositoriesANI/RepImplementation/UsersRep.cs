@@ -12,10 +12,6 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.RepositoriesANI.RepImplementati
         {
             _context = context;
         }
-
-
-
-        
         public async Task<IEnumerable<Users>> GetAllAsync()
         {
             return await _context.Users

@@ -29,7 +29,7 @@ public class SupportTicketsController : ControllerBase
 
     }
 
-   
+
     [HttpGet("admin")]
     public async Task<IActionResult> GetAdminTickets(
         int pageNumber = 1,
@@ -47,6 +47,8 @@ public class SupportTicketsController : ControllerBase
         );
         return Ok(result);
     }
+
+
     [HttpGet("user/{userId}")]
     public async Task<IActionResult> GetTicketsByUser(int userId)
     {
@@ -54,13 +56,13 @@ public class SupportTicketsController : ControllerBase
         return Ok(tickets);
     }
 
-   
+
     [HttpPost]
     public async Task<IActionResult> CreateTicket([FromBody] CreateSupportTicketDto dto)
     {
         if (dto.AssetId <= 0 || dto.UserId <= 0)
             return BadRequest("Invalid user or asset");
-        
+
         var ticket = new SupportTickets
         {
             CreatedBy = dto.UserId,
@@ -68,7 +70,7 @@ public class SupportTicketsController : ControllerBase
             IssueCategory = dto.IssueCategory,
             IssueDescription = dto.IssueDescription,
             Priority = dto.Priority,
-            StatusId = 1, // Default = Open
+            StatusId = 1,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -80,7 +82,7 @@ public class SupportTicketsController : ControllerBase
             ticketId = ticket.Id
         });
     }
-    
+
     [HttpPatch("{id}/status")]
     public async Task<IActionResult> UpdateTicketStatus(int id, [FromBody] UpdateStatusDto dto)
     {
@@ -158,9 +160,6 @@ public class SupportTicketsController : ControllerBase
         return Ok(comment);
     }
 
-  
-  
-
     [HttpGet("{ticketId}/comments")]
     public async Task<IActionResult> GetComments(int ticketId)
     {
@@ -171,7 +170,6 @@ public class SupportTicketsController : ControllerBase
             {
                 c.Id,
                 c.Comment,
-             
                 c.CreatedAt
             })
             .ToListAsync();
@@ -186,17 +184,12 @@ public class SupportTicketsController : ControllerBase
         var ticket = await _context.SupportTickets.FindAsync(id);
         if (ticket == null)
             return NotFound($"Ticket {id} not found");
-            
+
         _context.SupportTickets.Remove(ticket);
         await _context.SaveChangesAsync();
 
         return Ok(new { message = "Ticket deleted successfully" });
     }
 }
-
-//public class UpdateStatusDto
-//{
-//    public int StatusId { get; set; }
-//}
 
 

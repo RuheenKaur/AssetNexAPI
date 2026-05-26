@@ -1,7 +1,6 @@
 ﻿using Asp.Versioning;
 using AssetNex.API.Data;
 using AssetNex.API.Hubs;
-using AssetNex.API.Models.DomainModel;
 using AssetNex.API.RepositoriesANI.RepImplementation;
 using AssetNex.API.RepositoriesANI.RepInterface;
 using AssetNexAPI.AssetNexITAPI.AssetNex.API.RepositoriesANI.RepImplementation;
@@ -16,6 +15,7 @@ using Microsoft.OpenApi.Models;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using System.Text;
 using static AssetNex.API.Controllers.AuthController;
+using AssetNex.API.Models.DomainModelsANI;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -43,13 +43,9 @@ builder.Logging.AddConsole();
 builder.Services.Configure<JwtSettings>(
 builder.Configuration.GetSection("JwtSettings"));
 
-
-
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("AssetNexConnection")));
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("AssetNexConnectionString")));
 
 builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("AuthDbConnection")));
@@ -89,6 +85,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 });
 
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -113,14 +110,19 @@ builder.Services.AddAuthentication(options =>
     
     options.Events = new JwtBearerEvents
     {
+        OnAuthenticationFailed = context =>
+    {
+    
+        Console.WriteLine($"JWT FAILED: {context.Exception.Message}");
+        return Task.CompletedTask;
+},
         OnMessageReceived = context =>
         {
+        
             var accessToken = context.Request.Query["access_token"];
             var path = context.HttpContext.Request.Path;
             if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs/alerts"))
-            {
                 context.Token = accessToken;
-            }
             return Task.CompletedTask;
         }
     };
@@ -170,7 +172,6 @@ builder.Services.AddCors(options =>
         policy => policy
             .WithOrigins(
                 "http://localhost:4200",
-                "https://localhost:4200",
                 "https://assetnexangular.z29.web.core.windows.net")
             .AllowAnyHeader()
             .AllowAnyMethod()

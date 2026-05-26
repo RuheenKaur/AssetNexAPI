@@ -40,8 +40,8 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI
 
         [HttpPost("assign")]
         public async Task<IActionResult> AssignAsset(
-    [FromQuery] int assetId,
-    [FromQuery] int assignedToUserId)
+        [FromQuery] int assetId,
+        [FromQuery] int assignedToUserId)
         {
             var adminName = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "Admin";
 
@@ -108,16 +108,23 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI
 
             await _dbContext.SaveChangesAsync();
 
-            await _historyRepo.CreateAsync(new AssetsHistory
+            try
             {
-                AssetId = assetId,
-                UserId = userId,
-                EventType = "Returned",
-                Remarks = "Asset unassigned",
-                PerformedAt = DateTime.UtcNow,
-                StatusId = 1,
-                ModifiedBy = adminName
-            });
+                await _historyRepo.CreateAsync(new AssetsHistory
+                {
+                    AssetId = assetId,
+                    UserId = userId,
+                    EventType = "Returned",
+                    Remarks = "Asset unassigned",
+                    PerformedAt = DateTime.UtcNow,
+                    StatusId = 6,
+                    ModifiedBy = adminName
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"History log failed (unassign): {ex.Message}");
+            }
 
             return Ok(new { message = "Asset unassigned successfully" });
         }
@@ -144,7 +151,7 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI
                 AssetId = assetId,
                 UserId = newUserId,
                 AssignedOn = DateTime.UtcNow,
-                ReturnedOn = null,
+                ReturnedOn = DateTime.UtcNow,
                 AssetAssigned = "Assigned"
             };
 
@@ -175,7 +182,7 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI
         [HttpPut("return")]
         public async Task<IActionResult> ReturnAsset(
             [FromQuery] int assetId,
-            [FromQuery] int returnedByUserId,
+            [FromQuery] int returnedByUserId,   
             [FromQuery] string remarks)
         {
             var adminName = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "Admin";

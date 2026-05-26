@@ -82,10 +82,7 @@ public class SupportTicketsRep : ISupportTicketsRep
                 (t.User != null && t.User.Name.ToLower().Contains(searchLower)) ||
                 (t.Asset != null && t.Asset.AssetType.ToLower().Contains(searchLower))
             );
-        }
-
-
-
+        }   
         query = sortField switch
         {
             "Name" => sortOrder == "asc"
@@ -152,9 +149,6 @@ public class SupportTicketsRep : ISupportTicketsRep
         return await _context.TicketComments.Where(c => c.TicketId == ticketId).OrderBy(
             c => c.CreatedAt).AsNoTracking().ToListAsync();
     }
-
-
-
 
     public async Task<List<object>> GetAssignedAssetsByUserAsync(int createdBy)
     {

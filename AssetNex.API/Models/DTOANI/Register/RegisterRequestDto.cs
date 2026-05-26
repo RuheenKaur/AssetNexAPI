@@ -1,4 +1,4 @@
-﻿namespace AssetNex.API.Models.DTO.Register
+﻿namespace AssetNex.API.Models.DTOANI.Register
 {
     public class RegisterRequestDto
     {

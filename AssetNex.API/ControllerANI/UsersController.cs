@@ -1,6 +1,7 @@
 ﻿using AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DomainModelsANI;
 using AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DTOANI.User;
 using AssetNexAPI.AssetNexITAPI.AssetNex.API.RepositoriesANI.RepInterface;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI
@@ -31,9 +32,9 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI
                 createdOn = u.createdOn,
                 isActive = u.IsActive
             });
-            return Ok(result); 
+            return Ok(result);
         }
-       
+
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
@@ -52,52 +53,66 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI
             return Ok(dto);
         }
 
-
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] UserDto dto)
+        public async Task<IActionResult> Create(
+    [FromBody] UserDto dto,
+    [FromServices] UserManager<ApplicationUser> userManager)
         {
+
             var user = new Users
             {
                 Name = dto.Name,
                 Email = dto.Email,
                 Contact = dto.Contact ?? string.Empty,
                 Role = dto.Role ?? "User",
-                PasswordHash = "demo123",
+                PasswordHash = "managed-by-identity",
                 createdOn = DateTime.UtcNow,
                 IsActive = true
             };
             await _repo.CreateAsync(user);
-            return Ok(new { message = "User created", id = user.Id });
+
+
+            var defaultPassword = "Welcome@123";
+            var identityUser = new ApplicationUser
+            {
+                UserName = dto.Email.Trim(),
+                Email = dto.Email.Trim(),
+                EmailConfirmed = true
+            };
+
+            var result = await userManager.CreateAsync(identityUser, defaultPassword);
+            if (!result.Succeeded)
+            {
+
+                Console.WriteLine($"Identity creation failed for {dto.Email}: " +
+                    string.Join(", ", result.Errors.Select(e => e.Description)));
+            }
+            else
+            {
+                await userManager.AddToRoleAsync(identityUser, dto.Role ?? "User");
+            }
+
+            return Ok(new { message = "User created", id = user.Id, defaultPassword });
         }
+
+
+
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             await _repo.DeleteAsync(id);
-            return Ok("User Deleted");
+            return Ok(new { message = "User deleted" }); 
         }
 
-      
-        [HttpPost("loginuser")]
-        public async Task<IActionResult> Login(LoginDto dto)
+        [HttpPut("deactivate/{id}")]
+        public async Task<IActionResult> Deactivate(int id)
         {
-            var user = await _repo.GetByEmailAsync(dto.Email);
-
-            if (user == null)
-                return Unauthorized("Invalid credentials");
-
-          
-            if (user.PasswordHash != dto.Password)
-                return Unauthorized("Invalid credentials");
-
-            return Ok(new
-            {
-                userId = user.Id,
-                role = user.Role
-            });
+            var success = await _repo.DeactivateUserAsync(id);
+            if (!success) return NotFound(new { message = "User not found" });
+            return Ok(new { message = "User deactivated" });
         }
 
-      
         [HttpGet("profile/{id}")]
         public async Task<IActionResult> Profile(int id)
         {
@@ -113,7 +128,7 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI
             });
         }
 
-      
+
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, UserDto dto)
         {
@@ -127,16 +142,6 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI
             await _repo.UpdateAsync(existing);
 
             return Ok("Updated successfully");
-        }
-
-     
-        [HttpPut("deactivate/{id}")]
-        public async Task<IActionResult> Deactivate(int id)
-        {
-            var success = await _repo.DeactivateUserAsync(id);
-            if (!success) return NotFound();
-
-            return Ok("User Deactivated");
         }
     }
 }

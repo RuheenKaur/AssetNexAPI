@@ -1,4 +1,4 @@
-﻿namespace AssetNex.API.Models.DomainModel
+﻿namespace AssetNex.API.Models.DomainModelsANI
 {
     public class RefreshTokenModel
     {
@@ -10,8 +10,6 @@
         public string UserId { get; set; } = string.Empty;
         public DateTime? Revoked { get; set; }
         public bool IsActive => Revoked == null && !IsExpired;
-
-
 
     }
 }
