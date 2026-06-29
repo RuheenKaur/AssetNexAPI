@@ -1,15 +1,17 @@
-﻿﻿using System.Data;
+﻿using AssetNex.API.Data;
+using AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DomainModelsANI;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+﻿using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using AssetNex.API.Data;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
 using AssetNex.API.Models.DTOANI.Register;
+using AssetNex.API.Models.DTO.Register;
 
 
 namespace AssetNex.API.Controllers
@@ -92,6 +94,16 @@ namespace AssetNex.API.Controllers
             //db.RefreshTokenModel.Add(refreshToken);
             //await db.SaveChangesAsync();
 
+            var refreshToken = GenerateRefreshToken();
+
+            Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddDays(7)
+            });
+
             var primaryRole = userRoles.FirstOrDefault();
 
             return Ok(new
@@ -122,6 +134,7 @@ namespace AssetNex.API.Controllers
 
             return BadRequest(result.Errors);
         }
+
 
 
         [HttpPost("register")]
@@ -155,6 +168,17 @@ namespace AssetNex.API.Controllers
             }
 
             var roleResult = await _userManager.AddToRoleAsync(user, "User");
+
+            // NEW — create matching row in custom Users table 
+            var customUser = new Users
+            {
+                Name = request.Name ?? request.Email,
+                Email = request.Email,
+                Contact = request.Contact ?? ""
+            };
+            _appDb.Users.Add(customUser);
+            await _appDb.SaveChangesAsync();
+
             if (!roleResult.Succeeded)
             {
                 return Ok(new RegisterResponseDto
@@ -170,6 +194,7 @@ namespace AssetNex.API.Controllers
                 Message = "User registered successfully"
             });
         }
+
 
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromQuery] string email, [FromQuery] string newPassword)
@@ -211,20 +236,22 @@ namespace AssetNex.API.Controllers
                 return Unauthorized("Invalid user");
 
 
-            var claims = new List<Claim>
-        {
-        new Claim(ClaimTypes.Email, user.Email!)
-        };
-
+            // Build JWT without relying on Claim type to avoid type ambiguity
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
+            var signingCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var token = new JwtSecurityToken(
-            issuer: _jwtSettings.Issuer,
-            audience: _jwtSettings.Audience,
-            expires: DateTime.UtcNow.AddHours(_jwtSettings.ExpiryHours),
-            claims: claims,
-            signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
+            var header = new JwtHeader(signingCredentials);
+            var payload = new JwtPayload(
+                issuer: _jwtSettings.Issuer,
+                audience: _jwtSettings.Audience,
+                claims: null,
+                notBefore: null,
+                expires: DateTime.UtcNow.AddHours(_jwtSettings.ExpiryHours)
             );
+
+            payload[ClaimTypes.Email] = user.Email ?? string.Empty;
+
+            var token = new JwtSecurityToken(header, payload);
 
 
             if (user == null)

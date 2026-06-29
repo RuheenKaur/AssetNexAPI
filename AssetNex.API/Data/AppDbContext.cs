@@ -15,7 +15,7 @@ public class AppDbContext : DbContext
     public DbSet<AssetsHistory> AssetHistory { get; set; }
     public DbSet<StatusMaster> StatusMaster { get; set; }
     public DbSet<TicketComment> TicketComments { get; set; }
-
+    public DbSet<Department> Department { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -24,5 +24,36 @@ public class AppDbContext : DbContext
             .HasOne(t => t.User)
             .WithMany()
             .HasForeignKey(t => t.CreatedBy);
+
+
+        modelBuilder.Entity<AssetsHistory>()
+          .HasOne(h => h.Status)
+          .WithMany()
+          .HasForeignKey(h => h.StatusId)
+          .OnDelete(DeleteBehavior.Restrict);
+
+
+
+        modelBuilder.Entity<AssetRequests>()
+        .HasOne(r => r.Status)
+        .WithMany()
+        .HasForeignKey(r => r.StatusId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+
+
+        modelBuilder.Entity<SupportTickets>()
+        .HasOne(s => s.Status) 
+        .WithMany()
+        .HasForeignKey(s => s.StatusId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+
+        modelBuilder.Entity<AssetsMaster>().HasQueryFilter(a => !a.IsDeleted);
+
+        modelBuilder.Entity<SupportTickets>().HasQueryFilter(t => !t.IsDeleted);
+
+        modelBuilder.Entity<AssetRequests>().HasQueryFilter(r => !r.IsDeleted);
+
     }
 }

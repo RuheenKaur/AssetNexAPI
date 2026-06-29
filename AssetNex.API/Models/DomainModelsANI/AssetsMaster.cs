@@ -26,5 +26,9 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DomainModelsANI
         public DateTime? PurchaseDate { get; set; }
         public int DepartmentId { get; set; }
 
+        public bool IsDeleted { get; set; }
+
+        public string? DeletedBy { get; set; }
+        public DateTime? DeletedOn { get; set; }
     }
 }

@@ -1,9 +1,8 @@
-﻿using AssetNex.API.Models.DomainModel;
+﻿using AssetNex.API.Models.DomainModelsANI;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-
-
+// removed incorrect/useless using directives
 
 namespace AssetNex.API.Data
 {

@@ -1,6 +1,5 @@
 ﻿using Asp.Versioning;
 using AssetNex.API.Data;
-using AssetNex.API.Hubs;
 using AssetNex.API.RepositoriesANI.RepImplementation;
 using AssetNex.API.RepositoriesANI.RepInterface;
 using AssetNexAPI.AssetNexITAPI.AssetNex.API.RepositoriesANI.RepImplementation;
@@ -45,7 +44,6 @@ builder.Configuration.GetSection("JwtSettings"));
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("AssetNexConnection")));
-
 
 builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("AuthDbConnection")));
@@ -107,12 +105,10 @@ builder.Services.AddAuthentication(options =>
         RoleClaimType = "role"
     };
 
-    
     options.Events = new JwtBearerEvents
     {
         OnAuthenticationFailed = context =>
-    {
-    
+    {    
         Console.WriteLine($"JWT FAILED: {context.Exception.Message}");
         return Task.CompletedTask;
 },
@@ -130,7 +126,6 @@ builder.Services.AddAuthentication(options =>
 
 
 builder.Services.AddAuthorization();
-
 builder.Services.AddApiVersioning(options =>
 {
     options.AssumeDefaultVersionWhenUnspecified = true;
@@ -205,11 +200,10 @@ app.UseAuthorization();
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseMiddleware<GlobalExceptionMiddleware>();
-app.UseMiddleware<RequestLoggingMiddleware>();
+//app.UseMiddleware<RequestLoggingMiddleware>();
 app.MapControllers();
 app.MapGet("/test", () => "Working");
-app.MapHub<AlertHub>("/hubs/alerts");
-app.MapGet("/", () => "RUNNING ✅");
+app.MapGet("/", () => "RUNNING ");
 app.Logger.LogInformation("AssetNexIT API Started");
 
 app.MapGet("/api/minimal/assets", async (IAssetsAssignmentRep repo) =>

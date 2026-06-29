@@ -17,8 +17,13 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.RepositoriesANI.RepInterface
         );
         Task UpdateStatusAsync(int ticketId, int statusId);
         Task AddCommentAsync(TicketComment comment);
+
+        Task<bool> DeleteAsync(int id, string deletedBy);
         Task<List<TicketComment>> GetCommentsByTicketIdAsync(int ticketId);
         Task<List<object>> GetAssignedAssetsByUserAsync(int createdBy);
+
+        Task<SupportTickets?> GetByIdAsync(int id);
+        Task<bool> SoftDeleteAsync(int id, string deletedBy);
     }
 }
 

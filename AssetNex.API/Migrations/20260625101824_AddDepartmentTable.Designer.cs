@@ -8,11 +8,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace AssetNex.API.Migrations.AppDb
+namespace AssetNex.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260518103616_RequestUpdate")]
-    partial class RequestUpdate
+    [Migration("20260625101824_AddDepartmentTable")]
+    partial class AddDepartmentTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -65,18 +65,29 @@ namespace AssetNex.API.Migrations.AppDb
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AdminNotes")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("AssetId")
                         .HasColumnType("int");
 
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Reason")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("RequestedAssetType")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("RequestedBy")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("RequestedBy")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("RequestedOn")
                         .HasColumnType("datetime2");
@@ -213,8 +224,17 @@ namespace AssetNex.API.Migrations.AppDb
                     b.Property<DateTime?>("CreatedOn")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("DepartmentId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Model")
                         .IsRequired()
@@ -249,6 +269,23 @@ namespace AssetNex.API.Migrations.AppDb
                     b.HasIndex("StatusId");
 
                     b.ToTable("AssetMaster");
+                });
+
+            modelBuilder.Entity("AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DomainModelsANI.Department", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("DepartmentName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Department");
                 });
 
             modelBuilder.Entity("AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DomainModelsANI.StatusMaster", b =>
@@ -332,14 +369,12 @@ namespace AssetNex.API.Migrations.AppDb
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PasswordHash")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Role")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("RoleId")
+                    b.Property<int?>("RoleId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("createdOn")
@@ -366,6 +401,15 @@ namespace AssetNex.API.Migrations.AppDb
 
                     b.Property<int>("CreatedBy")
                         .HasColumnType("int");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("IssueCategory")
                         .IsRequired()
@@ -427,7 +471,7 @@ namespace AssetNex.API.Migrations.AppDb
                     b.HasOne("AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DomainModelsANI.StatusMaster", "Status")
                         .WithMany()
                         .HasForeignKey("StatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DomainModelsANI.Users", "User")
@@ -454,7 +498,7 @@ namespace AssetNex.API.Migrations.AppDb
                     b.HasOne("AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DomainModelsANI.StatusMaster", "Status")
                         .WithMany()
                         .HasForeignKey("StatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DomainModelsANI.Users", "User")
@@ -498,7 +542,7 @@ namespace AssetNex.API.Migrations.AppDb
                     b.HasOne("AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DomainModelsANI.StatusMaster", "Status")
                         .WithMany()
                         .HasForeignKey("StatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Asset");

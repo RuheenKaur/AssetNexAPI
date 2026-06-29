@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI
 {
@@ -156,8 +157,9 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var deleted = await _repo.DeleteAsync(id);
-            if (!deleted) return NotFound();
+            var deletedBy = User.FindFirst(ClaimTypes.Email)?.Value ?? "Unknown";
+            var result = await _repo.DeleteAsync(id, deletedBy);
+            if (!result) return NotFound();
             return NoContent();
         }
 

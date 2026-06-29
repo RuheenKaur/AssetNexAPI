@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace AssetNex.API.Migrations.AppDb
+namespace AssetNex.API.Migrations
 {
     /// <inheritdoc />
-    public partial class FreshAzureStart : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -26,30 +26,6 @@ namespace AssetNex.API.Migrations.AppDb
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Asset_Software", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AssetMaster",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    StatusId = table.Column<int>(type: "int", nullable: false),
-                    AssetTag = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AssetType = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Brand = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SerialNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Model = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    RAM_GB = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Storage_GB = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PurchaseCost = table.Column<int>(type: "int", nullable: false),
-                    WarrantyDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    PurchaseDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DepartmentId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AssetMaster", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -98,7 +74,7 @@ namespace AssetNex.API.Migrations.AppDb
                     Contact = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DepartmentId = table.Column<int>(type: "int", nullable: false),
                     RoleId = table.Column<int>(type: "int", nullable: false),
-                    CreatedOn = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    createdOn = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -106,11 +82,42 @@ namespace AssetNex.API.Migrations.AppDb
                 });
 
             migrationBuilder.CreateTable(
+                name: "AssetMaster",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    StatusId = table.Column<int>(type: "int", nullable: false),
+                    AssetTag = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AssetType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Brand = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SerialNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Model = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    RAM_GB = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Storage_GB = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedOn = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    PurchaseCost = table.Column<int>(type: "int", nullable: false),
+                    WarrantyDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    PurchaseDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DepartmentId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AssetMaster", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AssetMaster_StatusMaster_StatusId",
+                        column: x => x.StatusId,
+                        principalTable: "StatusMaster",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AssetAssignments",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
-                    .Annotation("SqlServer:Identity", "1, 1"),
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     AssetId = table.Column<int>(type: "int", nullable: false),
                     UserId = table.Column<int>(type: "int", nullable: false),
                     ReturnedOn = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -126,6 +133,12 @@ namespace AssetNex.API.Migrations.AppDb
                         principalTable: "AssetMaster",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AssetAssignments_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -137,15 +150,16 @@ namespace AssetNex.API.Migrations.AppDb
                     AssetId = table.Column<int>(type: "int", nullable: false),
                     UserId = table.Column<int>(type: "int", nullable: false),
                     StatusId = table.Column<int>(type: "int", nullable: false),
+                    EventDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    AssignedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ReturnedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ReferenceTicketId = table.Column<int>(type: "int", nullable: true),
+                    CostIncurred = table.Column<int>(type: "int", nullable: true),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     EventType = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    EventDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ReferenceTicketId = table.Column<int>(type: "int", nullable: false),
-                    AssignedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ReturnedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Remarks = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PerformedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Vendor = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CostIncurred = table.Column<int>(type: "int", nullable: false)
+                    Vendor = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -161,7 +175,7 @@ namespace AssetNex.API.Migrations.AppDb
                         column: x => x.StatusId,
                         principalTable: "StatusMaster",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_AssetHistory_Users_UserId",
                         column: x => x.UserId,
@@ -176,10 +190,12 @@ namespace AssetNex.API.Migrations.AppDb
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    AdminNotes = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     AssetId = table.Column<int>(type: "int", nullable: false),
                     UserId = table.Column<int>(type: "int", nullable: false),
-                    RequestedAssetType = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Reason = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    RequestedBy = table.Column<int>(type: "int", nullable: true),
+                    RequestedAssetType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Reason = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     StatusId = table.Column<int>(type: "int", nullable: false),
                     RequestedOn = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
@@ -197,7 +213,7 @@ namespace AssetNex.API.Migrations.AppDb
                         column: x => x.StatusId,
                         principalTable: "StatusMaster",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_AssetRequests_Users_UserId",
                         column: x => x.UserId,
@@ -235,7 +251,7 @@ namespace AssetNex.API.Migrations.AppDb
                         column: x => x.StatusId,
                         principalTable: "StatusMaster",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_SupportTickets_Users_CreatedBy",
                         column: x => x.CreatedBy,
@@ -248,6 +264,11 @@ namespace AssetNex.API.Migrations.AppDb
                 name: "IX_AssetAssignments_AssetId",
                 table: "AssetAssignments",
                 column: "AssetId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AssetAssignments_UserId",
+                table: "AssetAssignments",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AssetHistory_AssetId",
@@ -263,6 +284,11 @@ namespace AssetNex.API.Migrations.AppDb
                 name: "IX_AssetHistory_UserId",
                 table: "AssetHistory",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AssetMaster_StatusId",
+                table: "AssetMaster",
+                column: "StatusId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AssetRequests_AssetId",
@@ -320,10 +346,10 @@ namespace AssetNex.API.Migrations.AppDb
                 name: "AssetMaster");
 
             migrationBuilder.DropTable(
-                name: "StatusMaster");
+                name: "Users");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "StatusMaster");
         }
     }
 }

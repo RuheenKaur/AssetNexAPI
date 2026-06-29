@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using System.Security.Claims;
 
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 [Route("api/support-tickets")]
@@ -178,17 +180,39 @@ public class SupportTicketsController : ControllerBase
     }
 
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteTicket(int id)
+    //[HttpDelete("{id}")]
+    //public async Task<IActionResult> DeleteTicket(int id)
+    //{
+    //    var ticket = await _context.SupportTickets.FindAsync(id);
+    //    if (ticket == null)
+    //        return NotFound($"Ticket {id} not found");
+
+    //    _context.SupportTickets.Remove(ticket);
+    //    await _context.SaveChangesAsync();
+
+    //    return Ok(new { message = "Ticket deleted successfully" });
+    //}
+
+
+
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(int id)
     {
-        var ticket = await _context.SupportTickets.FindAsync(id);
-        if (ticket == null)
-            return NotFound($"Ticket {id} not found");
+        var deletedBy = User.FindFirst(ClaimTypes.Email)?.Value ?? "Unknown";
+        var result = await _repo.DeleteAsync(id, deletedBy); // or DeleteAsync depending on naming
+        if (!result) return NotFound();
+        return NoContent();
+    }
 
-        _context.SupportTickets.Remove(ticket);
-        await _context.SaveChangesAsync();
 
-        return Ok(new { message = "Ticket deleted successfully" });
+    [HttpPut("{id}/softdelete")]
+    public async Task<IActionResult> SoftDelete(int id)
+    {
+        var deletedBy = User.FindFirst(ClaimTypes.Email)?.Value ?? "Unknown";
+        var result = await _repo.SoftDeleteAsync(id, deletedBy);
+
+        if (!result) return NotFound();
+        return NoContent();
     }
 }
 

@@ -11,21 +11,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Models\DTO\NewFolder1\**" />
-    <Compile Remove="Models\DTO\NewFolder2\**" />
-    <Compile Remove="Models\DTO\NewFolder\**" />
     <Compile Remove="Models\NewFolder\**" />
-    <Content Remove="Models\DTO\NewFolder1\**" />
-    <Content Remove="Models\DTO\NewFolder2\**" />
-    <Content Remove="Models\DTO\NewFolder\**" />
     <Content Remove="Models\NewFolder\**" />
-    <EmbeddedResource Remove="Models\DTO\NewFolder1\**" />
-    <EmbeddedResource Remove="Models\DTO\NewFolder2\**" />
-    <EmbeddedResource Remove="Models\DTO\NewFolder\**" />
     <EmbeddedResource Remove="Models\NewFolder\**" />
-    <None Remove="Models\DTO\NewFolder1\**" />
-    <None Remove="Models\DTO\NewFolder2\**" />
-    <None Remove="Models\DTO\NewFolder\**" />
     <None Remove="Models\NewFolder\**" />
   </ItemGroup>
 

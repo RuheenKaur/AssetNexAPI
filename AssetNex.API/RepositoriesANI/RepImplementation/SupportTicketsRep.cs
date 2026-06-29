@@ -8,7 +8,6 @@ using Microsoft.Identity.Client;
 using System.Reflection.Metadata.Ecma335;
 using System.Runtime.InteropServices;
 using static Dropbox.Api.Files.SearchMatchType;
-using AssetNex.API.Models.DTO.Asset;
 
 public class SupportTicketsRep : ISupportTicketsRep
 {
@@ -134,7 +133,23 @@ public class SupportTicketsRep : ISupportTicketsRep
         ticket.StatusId = statusId;
         await _context.SaveChangesAsync();
     }
+    public async Task<SupportTickets?> GetByIdAsync(int id)
+    {
+        return await _context.SupportTickets.FirstOrDefaultAsync(t => t.Id == id);
+    }
 
+    public async Task<bool> SoftDeleteAsync(int id, string deletedBy)
+    {
+        var ticket = await _context.SupportTickets.FirstOrDefaultAsync(t => t.Id == id);
+        if (ticket == null) return false;
+
+        ticket.IsDeleted = true;
+        ticket.DeletedBy = deletedBy;
+        ticket.DeletedOn = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+        return true;
+    }
 
     public async Task AddCommentAsync(TicketComment comment)
     {
@@ -163,6 +178,20 @@ public class SupportTicketsRep : ISupportTicketsRep
             .Distinct()
             .Cast<object>()
             .ToListAsync();
+    }
+
+    public async Task<bool> DeleteAsync(int id, string deletedBy)
+    {
+        var ticket = await _context.SupportTickets.FirstOrDefaultAsync(t => t.Id == id);
+        if (ticket == null) return false;
+
+        ticket.IsDeleted = true;
+        ticket.DeletedBy = deletedBy;
+        ticket.DeletedOn = DateTime.UtcNow;
+
+        _context.SupportTickets.Update(ticket);
+        await _context.SaveChangesAsync();
+        return true;
     }
 
 }

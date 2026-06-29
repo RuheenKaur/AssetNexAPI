@@ -1,5 +1,4 @@
 ﻿using AssetNex.API.Models.DomainModel;
-using AssetNex.API.Models.DTO.Asset;
 using AssetNex.API.Models.DTOANI.AssetRequests;
 using AssetNex.API.RepositoriesANI.RepInterface;
 using AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DomainModelsANI;
@@ -15,6 +14,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.SqlServer.Server;
 using Serilog;
 using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using static Azure.Core.HttpHeader;
 using static Dropbox.Api.Files.SearchMatchType;
@@ -146,14 +146,14 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.ControllerANI.V1
             return Ok(updated);
         }
 
-
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var deleted = await _repo.Delete(id);
-            if (!deleted)
-                return NotFound($"Asset Request ID {id} not found");
-            return Ok($"Request ID {id} removed successfully.");
+            var deletedBy = User.FindFirst(ClaimTypes.Email)?.Value ?? "Unknown";
+            var result = await _repo.Delete(id, deletedBy); 
+            if (!result) return NotFound();
+            return NoContent();
+
         }
 
 

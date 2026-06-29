@@ -2,10 +2,10 @@
 
 #nullable disable
 
-namespace AssetNex.API.Migrations
+namespace AssetNex.API.Migrations.AuthDb
 {
     /// <inheritdoc />
-    public partial class SupportReqsTable : Migration
+    public partial class InitialAuth : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

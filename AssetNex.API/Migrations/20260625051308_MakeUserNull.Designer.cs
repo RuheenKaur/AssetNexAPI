@@ -8,11 +8,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace AssetNex.API.Migrations.AppDb
+namespace AssetNex.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260326044536_FreshAzureStart")]
-    partial class FreshAzureStart
+    [Migration("20260625051308_MakeUserNull")]
+    partial class MakeUserNull
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -52,6 +52,8 @@ namespace AssetNex.API.Migrations.AppDb
 
                     b.HasIndex("AssetId");
 
+                    b.HasIndex("UserId");
+
                     b.ToTable("AssetAssignments");
                 });
 
@@ -63,16 +65,29 @@ namespace AssetNex.API.Migrations.AppDb
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AdminNotes")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("AssetId")
                         .HasColumnType("int");
 
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Reason")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("RequestedAssetType")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("RequestedBy")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("RequestedOn")
                         .HasColumnType("datetime2");
@@ -135,30 +150,34 @@ namespace AssetNex.API.Migrations.AppDb
                     b.Property<int>("AssetId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("AssignedDate")
+                    b.Property<DateTime?>("AssignedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("CostIncurred")
+                    b.Property<int?>("CostIncurred")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("EventDate")
+                    b.Property<DateTime?>("EventDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("EventType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ModifiedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("PerformedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("ReferenceTicketId")
+                    b.Property<int?>("ReferenceTicketId")
                         .HasColumnType("int");
 
                     b.Property<string>("Remarks")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("ReturnedDate")
+                    b.Property<DateTime?>("ReturnedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("StatusId")
@@ -202,8 +221,20 @@ namespace AssetNex.API.Migrations.AppDb
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("CreatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("DepartmentId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Model")
                         .IsRequired()
@@ -212,7 +243,7 @@ namespace AssetNex.API.Migrations.AppDb
                     b.Property<int>("PurchaseCost")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("PurchaseDate")
+                    b.Property<DateTime?>("PurchaseDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("RAM_GB")
@@ -230,10 +261,12 @@ namespace AssetNex.API.Migrations.AppDb
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("WarrantyDate")
+                    b.Property<DateTime?>("WarrantyDate")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("StatusId");
 
                     b.ToTable("AssetMaster");
                 });
@@ -304,9 +337,6 @@ namespace AssetNex.API.Migrations.AppDb
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
                     b.Property<int>("DepartmentId")
                         .HasColumnType("int");
 
@@ -322,15 +352,16 @@ namespace AssetNex.API.Migrations.AppDb
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PasswordHash")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Role")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("RoleId")
+                    b.Property<int?>("RoleId")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("createdOn")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -353,6 +384,15 @@ namespace AssetNex.API.Migrations.AppDb
 
                     b.Property<int>("CreatedBy")
                         .HasColumnType("int");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("IssueCategory")
                         .IsRequired()
@@ -392,7 +432,15 @@ namespace AssetNex.API.Migrations.AppDb
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DomainModelsANI.Users", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Asset");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DomainModelsANI.AssetRequests", b =>
@@ -406,7 +454,7 @@ namespace AssetNex.API.Migrations.AppDb
                     b.HasOne("AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DomainModelsANI.StatusMaster", "Status")
                         .WithMany()
                         .HasForeignKey("StatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DomainModelsANI.Users", "User")
@@ -433,7 +481,7 @@ namespace AssetNex.API.Migrations.AppDb
                     b.HasOne("AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DomainModelsANI.StatusMaster", "Status")
                         .WithMany()
                         .HasForeignKey("StatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DomainModelsANI.Users", "User")
@@ -447,6 +495,17 @@ namespace AssetNex.API.Migrations.AppDb
                     b.Navigation("Status");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DomainModelsANI.AssetsMaster", b =>
+                {
+                    b.HasOne("AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DomainModelsANI.StatusMaster", "Status")
+                        .WithMany()
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Status");
                 });
 
             modelBuilder.Entity("SupportTickets", b =>
@@ -466,7 +525,7 @@ namespace AssetNex.API.Migrations.AppDb
                     b.HasOne("AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DomainModelsANI.StatusMaster", "Status")
                         .WithMany()
                         .HasForeignKey("StatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Asset");

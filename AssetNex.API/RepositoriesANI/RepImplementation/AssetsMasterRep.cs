@@ -141,12 +141,16 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.RepositoriesANI.RepImplementati
             return existing;
 
         }
-        public async Task<bool> DeleteAsync(int id)
-
-        { 
-            var existing = await _context.AssetMaster.FirstOrDefaultAsync(a => a.Id == id) ?? null; 
+        public async Task<bool> DeleteAsync(int id, string deletedBy)
+        {
+            var existing = await _context.AssetMaster.FirstOrDefaultAsync(a => a.Id == id);
             if (existing == null) return false;
-            _context.AssetMaster.Remove(existing);
+
+            existing.IsDeleted = true;
+            existing.DeletedBy = deletedBy;
+            existing.DeletedOn = DateTime.UtcNow;
+
+            _context.AssetMaster.Update(existing);
             await _context.SaveChangesAsync();
             return true;
         }

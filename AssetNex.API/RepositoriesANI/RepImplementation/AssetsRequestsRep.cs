@@ -57,16 +57,28 @@ namespace AssetNex.API.RepositoriesANI.RepImplementation
         }
 
 
-        public async Task<bool> Delete(int id)
-        {
-            var record = await _context.AssetRequests.FirstOrDefaultAsync(a => a.Id ==id);
+        //public async Task<bool> Delete(int id)
+        //{
+        //    var record = await _context.AssetRequests.FirstOrDefaultAsync(a => a.Id ==id);
 
+        //    if (record == null) return false;
+        //    _context.AssetRequests.Remove(record);
+        //    await _context.SaveChangesAsync();
+        //    return true;
+        //}
+        public async Task<bool> Delete(int id, string deletedBy)
+        {
+            var record = await _context.AssetRequests.FirstOrDefaultAsync(a => a.Id == id);
             if (record == null) return false;
-            _context.AssetRequests.Remove(record);
+
+            record.IsDeleted = true;
+            record.DeletedBy = deletedBy;
+            record.DeletedOn = DateTime.UtcNow;
+
+            _context.AssetRequests.Update(record);
             await _context.SaveChangesAsync();
             return true;
         }
-    
         public async Task<AssetRequests> Add(AssetRequests request)
         {
             _context.AssetRequests.Add(request);
@@ -79,6 +91,11 @@ namespace AssetNex.API.RepositoriesANI.RepImplementation
 
         public async Task<AssetRequests?> Get(int id) =>
             await _context.AssetRequests.FindAsync(id);
+
+        public Task<bool> Delete(int id)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
 
