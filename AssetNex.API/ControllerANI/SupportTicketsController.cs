@@ -72,7 +72,7 @@ public class SupportTicketsController : ControllerBase
             IssueCategory = dto.IssueCategory,
             IssueDescription = dto.IssueDescription,
             Priority = dto.Priority,
-            StatusId = 1,
+            StatusId = 6,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -146,6 +146,7 @@ public class SupportTicketsController : ControllerBase
             createdAt = comment.CreatedAt
         });
     }
+
     [HttpPost("comment")]
     public async Task<IActionResult> AddComment([FromBody] AddCommentDto dto)
     {
@@ -203,8 +204,8 @@ public class SupportTicketsController : ControllerBase
         if (!result) return NotFound();
         return NoContent();
     }
-
-
+    
+    
     [HttpPut("{id}/softdelete")]
     public async Task<IActionResult> SoftDelete(int id)
     {

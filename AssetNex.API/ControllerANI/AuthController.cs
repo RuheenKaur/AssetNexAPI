@@ -221,6 +221,8 @@ namespace AssetNex.API.Controllers
         }
 
 
+    
+
         [HttpPost("refresh")]
         public async Task<IActionResult> RefreshToken([FromBody] string refreshToken)
         {
@@ -236,10 +238,9 @@ namespace AssetNex.API.Controllers
                 return Unauthorized("Invalid user");
 
 
-            // Build JWT without relying on Claim type to avoid type ambiguity
+            
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
             var signingCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
             var header = new JwtHeader(signingCredentials);
             var payload = new JwtPayload(
                 issuer: _jwtSettings.Issuer,

@@ -22,7 +22,7 @@ public class SupportTickets
     public int StatusId { get; set; }
     public StatusMaster Status { get; set; }
     public DateTime CreatedAt { get; set; }
-    public string ResolutionNotes { get; set; }
+    public string? ResolutionNotes { get; set; }
     public bool IsDeleted { get; set; }
     public string? DeletedBy { get; set; }
     public DateTime? DeletedOn { get; set; }

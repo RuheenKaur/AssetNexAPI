@@ -22,7 +22,7 @@ namespace AssetNexAPI.AssetNexITAPI.AssetNex.API.Models.DomainModelsANI
 
         [Column(TypeName = "datetime2")]
         public DateTime PerformedAt { get; set; }
-        public string Vendor { get; set; }
+        public string? Vendor { get; set; }
        
     }
 }
